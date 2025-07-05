@@ -7,7 +7,7 @@ import { ROLES } from '../../constants/roles';
 import SettingsMenu, { getDefaultSettingsButton } from '../../components/SettingsMenu';
 import ApplicantListLeft from './ApplicantListLeft';
 import ResumeCard from '../../components/ResumeCard';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useParams, Link } from 'react-router-dom';
 import api from '../../api/api';
 
 export default function ApplicantList() {
@@ -31,7 +31,7 @@ export default function ApplicantList() {
   const [expanded, setExpanded] = useState(null);
   
   // jobPostId가 없으면 기본값 사용
-  const effectiveJobPostId = jobPostId || '472';
+  const effectiveJobPostId = jobPostId;
 
   const toggleExpand = (applicantId) => {
     setExpanded(expanded === applicantId ? null : applicantId);

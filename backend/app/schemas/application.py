@@ -10,7 +10,6 @@ def to_camel(string: str) -> str:
 class ApplicationBase(BaseModel):
     job_post_id: int
     resume_id: int
-    cover_letter: Optional[str] = None
     status: ApplyStatus = ApplyStatus.WAITING
     score: Optional[float] = None
     ai_score: Optional[float] = None
@@ -31,7 +30,6 @@ class ApplicationCreate(ApplicationBase):
 
 class ApplicationUpdate(BaseModel):
     status: Optional[ApplyStatus] = None
-    cover_letter: Optional[str] = None
     class Config:
         alias_generator = to_camel
         populate_by_name = True
@@ -40,8 +38,21 @@ class ApplicationUpdate(BaseModel):
 class ApplicationDetail(ApplicationBase):
     id: int
     user_id: int
-    created_at: datetime
-    updated_at: datetime
+    created_at: Optional[datetime] = None
+    updated_at: Optional[datetime] = None
+    # 이력서 정보 필드 추가
+    applicantName: Optional[str] = None
+    gender: Optional[str] = None
+    birthDate: Optional[datetime] = None
+    email: Optional[str] = None
+    address: Optional[str] = None
+    phone: Optional[str] = None
+    educations: Optional[List] = None
+    awards: Optional[List] = None
+    certificates: Optional[List] = None
+    skills: Optional[List[str]] = None
+    experiences: Optional[List] = None  # activities + project_experience 통합
+    content: Optional[str] = None
     
     class Config:
         alias_generator = to_camel
