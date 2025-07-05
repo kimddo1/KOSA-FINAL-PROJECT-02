@@ -29,6 +29,12 @@ def get_company_job_posts(
     check_company_role(current_user)
     
     job_posts = db.query(JobPost).filter(JobPost.company_id == current_user.company_id).offset(skip).limit(limit).all()
+    
+    # Add company name to each job post
+    for job_post in job_posts:
+        if job_post.company:
+            job_post.companyName = job_post.company.name
+    
     return job_posts
 
 
@@ -48,6 +54,11 @@ def get_company_job_post(
     
     if not job_post:
         raise HTTPException(status_code=404, detail="Job post not found")
+    
+    # Add company name to the response
+    if job_post.company:
+        job_post.companyName = job_post.company.name
+    
     return job_post
 
 
@@ -84,6 +95,11 @@ def create_company_job_post(
     db.add(db_job_post)
     db.commit()
     db.refresh(db_job_post)
+    
+    # Add company name to the response
+    if db_job_post.company:
+        db_job_post.companyName = db_job_post.company.name
+    
     return db_job_post
 
 
@@ -110,6 +126,11 @@ def update_company_job_post(
     
     db.commit()
     db.refresh(db_job_post)
+    
+    # Add company name to the response
+    if db_job_post.company:
+        db_job_post.companyName = db_job_post.company.name
+    
     return db_job_post
 
 

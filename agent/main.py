@@ -1,15 +1,38 @@
 from fastapi import FastAPI, Request
+from fastapi.middleware.cors import CORSMiddleware
 from agents.graph_agent import build_graph
 from agents.chatbot_graph import create_chatbot_graph, initialize_chat_state, create_session_id
 from agents.chatbot_node import ChatbotNode
 from dotenv import load_dotenv
 import uuid
+import os
 
 load_dotenv()
 
 app = FastAPI()
-graph_agent = build_graph()
-chatbot_graph = create_chatbot_graph()
+
+# CORS 미들웨어 추가
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:5173", "http://localhost:3000"],  # 프론트엔드 주소
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# OpenAI API 키가 있을 때만 그래프 초기화
+try:
+    if os.getenv("OPENAI_API_KEY"):
+        graph_agent = build_graph()
+        chatbot_graph = create_chatbot_graph()
+    else:
+        graph_agent = None
+        chatbot_graph = None
+        print("Warning: OPENAI_API_KEY not found. Some features will be limited.")
+except Exception as e:
+    print(f"Error initializing agents: {e}")
+    graph_agent = None
+    chatbot_graph = None
 
 @app.post("/run/")
 async def run(request: Request):
@@ -35,6 +58,7 @@ async def chat(request: Request):
     data = await request.json()
     user_message = data.get("message", "")
     session_id = data.get("session_id", None)
+    page_context = data.get("page_context", {})  # 페이지 컨텍스트 추가
     
     if not user_message:
         return {"error": "Message is required"}
@@ -43,8 +67,20 @@ async def chat(request: Request):
     if not session_id:
         session_id = create_session_id()
     
-    # 챗봇 상태 초기화
-    chat_state = initialize_chat_state(user_message, session_id)
+    # chatbot_graph가 초기화되지 않은 경우 기본 응답
+    if chatbot_graph is None:
+        return {
+            "session_id": session_id,
+            "ai_response": "죄송합니다. 현재 챗봇 서비스가 설정 중입니다. 잠시 후 다시 시도해주세요.",
+            "context_used": "",
+            "conversation_history_length": 0,
+            "page_suggestions": [],
+            "dom_actions": [],
+            "error": "OpenAI API key not configured"
+        }
+    
+    # 챗봇 상태 초기화 (페이지 컨텍스트 포함)
+    chat_state = initialize_chat_state(user_message, session_id, page_context)
     
     # 챗봇 그래프 실행
     try:
@@ -54,6 +90,8 @@ async def chat(request: Request):
             "ai_response": result.get("ai_response", ""),
             "context_used": result.get("context_used", ""),
             "conversation_history_length": result.get("conversation_history_length", 0),
+            "page_suggestions": result.get("page_suggestions", []),  # 페이지별 제안사항
+            "dom_actions": result.get("dom_actions", []),  # DOM 조작 액션
             "error": result.get("error", "")
         }
     except Exception as e:

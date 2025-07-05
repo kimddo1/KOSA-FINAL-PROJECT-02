@@ -198,6 +198,33 @@ uvicorn main:app --reload --port 8001
 
 ## ⚠️ 주의사항
 
+### 이메일 발송 설정 (Gmail SMTP)
+이메일 인증 기능을 사용하려면 Gmail 앱 비밀번호를 설정해야 합니다:
+
+1. **Gmail 2단계 인증 활성화**
+   - Gmail → 설정 → 보안 → 2단계 인증 켜기
+
+2. **앱 비밀번호 생성**
+   - Gmail → 설정 → 보안 → 앱 비밀번호
+   - "앱 선택" → "기타" → 이름 입력 (예: "KOCruit")
+   - 생성된 16자리 비밀번호 복사
+
+3. **환경변수 설정**
+   프로젝트 루트에 `.env` 파일 생성:
+   ```bash
+   # Gmail SMTP 설정
+   MAIL_USERNAME=your_email@gmail.com
+   MAIL_PASSWORD=your_app_password_16_digits
+   MAIL_FROM=your_email@gmail.com
+   MAIL_PORT=587
+   MAIL_SERVER=smtp.gmail.com
+   ```
+
+4. **컨테이너 재시작**
+   ```bash
+   docker-compose restart backend
+   ```
+
 ### 경고 메시지 해석
 시드 데이터 실행 시 다음과 같은 경고가 나타날 수 있습니다:
 ```
@@ -245,6 +272,10 @@ lsof -i :3307  # MySQL 포트 확인
 ```bash
 # MySQL 컨테이너 상태 확인
 docker logs mysql
+
+# 백엔드가 MySQL보다 먼저 실행되어 연결 오류가 발생하는 경우
+# (ERR_CONNECTION_RESET, Connection refused 등)
+docker-compose restart backend
 ```
 
 ---

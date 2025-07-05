@@ -5,7 +5,7 @@ function JobCard({ job }) {
     <div className="card">
       <div className="card-body">
         <h5>{job.title}</h5>
-        <p>{job.company}</p>
+        <p>{job.companyName || job.company}</p>
         <p>{job.location}</p>
       </div>
     </div>

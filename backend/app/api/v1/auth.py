@@ -64,7 +64,7 @@ async def signup(request: SignupRequest, db: Session = Depends(get_db)):
             email=request.email,
             name=request.name,
             password=security.get_password_hash(request.password),
-            role=Role.MEMBER,
+            role=Role.MANAGER,
             address=request.address,
             gender=request.gender,
             phone=request.phone,
@@ -133,6 +133,9 @@ def refresh(request: RefreshTokenRequest, db: Session = Depends(get_db)):
 
 @router.get("/me", response_model=UserDetail)
 def get_current_user_info(current_user: User = Depends(get_current_user)):
+    # Add company name if user is a company user
+    if hasattr(current_user, 'company') and current_user.company:
+        current_user.companyName = current_user.company.name
     return current_user
 
 

@@ -16,7 +16,7 @@ chromadb==0.4.24
 sentence-transformers==3.0.1
 
 # Memory and State Management
-redis==5.2.1
+redis>=4.0.0
 
 # Utilities
 python-dotenv==1.0.1

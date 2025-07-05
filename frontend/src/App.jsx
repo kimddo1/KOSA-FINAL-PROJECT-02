@@ -25,13 +25,12 @@ import MemberSchedule from './pages/schedule/MemberSchedule.jsx';
 // Context & Constants
 import { ThemeProvider } from "./context/ThemeContext";
 import { ROLES } from './constants/roles';
-import { AuthProvider } from './context/AuthContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
 
 // Components
 import ProtectedRoute from './components/ProtectedRoute';
 import TestConnection from './components/TestConnection';
 import ScrollToTop from './components/ScrollToTop';
-import { useAuth } from './context/AuthContext';
 import Chatbot from './components/Chatbot';
 import { ChakraProvider } from '@chakra-ui/react';
 
@@ -70,50 +69,58 @@ class ErrorBoundary extends React.Component {
   }
 }
 
+// App Routes Component
+function AppRoutes() {
+  const { user } = useAuth();
+
+  return (
+    <BrowserRouter>
+      <ScrollToTop />
+      <ChakraProvider>
+        <ThemeProvider>
+          <div className="min-h-screen bg-[#eef6ff] dark:bg-black">
+            <Routes>
+              {/* Public Routes */}
+              <Route path="/" element={<Home />} />
+              <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
+              <Route path="/joblist" element={<JobList />} />
+              <Route path="/common/company" element={<PartnerList />} />
+              <Route path="/common/company/:id" element={<PartnerDetail />} />
+              <Route path="/common/jobposts/:id" element={<CommonViewPost />} />
+              <Route path="/role-test" element={<RoleTest />} />
+              <Route path="/test-connection" element={<TestConnection />} />
+
+              {/* Protected Routes */}
+              <Route path="/mypage" element={<ProtectedRoute><MyPage /></ProtectedRoute>} />
+              <Route path="/corporatehome" element={<ProtectedRoute><CorporateHome /></ProtectedRoute>} />
+              <Route path="/applicantlist" element={<ProtectedRoute><ApplicantList /></ProtectedRoute>} />
+              <Route path="/email" element={<ProtectedRoute><Email /></ProtectedRoute>} />
+              <Route path="/postrecruitment" element={<ProtectedRoute><PostRecruitment /></ProtectedRoute>} />
+              <Route path="/company/jobposts/:id" element={<ProtectedRoute><CommonViewPost /></ProtectedRoute>} />
+              <Route path="/viewpost/:jobPostId" element={<ProtectedRoute><ViewPost /></ProtectedRoute>} />
+              <Route path="/passedapplicants/:jobPostId" element={<ProtectedRoute><PassedApplicants /></ProtectedRoute>} />
+              <Route path="/editpost/:jobPostId" element={<ProtectedRoute><EditPost /></ProtectedRoute>} />
+              <Route path="/rejectedapplicants/:jobPostId" element={<ProtectedRoute><RejectedApplicants /></ProtectedRoute>} />
+              <Route path="/managerschedule" element={<ProtectedRoute><ManagerSchedule /></ProtectedRoute>} />
+              <Route path="/memberschedule" element={<ProtectedRoute><MemberSchedule /></ProtectedRoute>} />
+              <Route path="/applicantlist/:jobPostId" element={<ProtectedRoute><ApplicantList /></ProtectedRoute>} />
+            </Routes>
+            {user && user.role !== 'guest' && <Chatbot />}
+          </div>
+        </ThemeProvider>
+      </ChakraProvider>
+    </BrowserRouter>
+  );
+}
+
 function App() {
   console.log('App component rendering');
-  const { user } = useAuth();
 
   return (
     <ErrorBoundary>
       <AuthProvider>
-      <BrowserRouter>
-        <ScrollToTop />
-        <ChakraProvider>
-          <ThemeProvider>
-            <div className="min-h-screen bg-[#eef6ff] dark:bg-black">
-              <Routes>
-                {/* Public Routes */}
-                <Route path="/" element={<Home />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/signup" element={<Signup />} />
-                <Route path="/joblist" element={<JobList />} />
-                <Route path="/common/company" element={<PartnerList />} />
-                <Route path="/common/company/:id" element={<PartnerDetail />} />
-                <Route path="/common/jobposts/:id" element={<CommonViewPost />} />
-                <Route path="/role-test" element={<RoleTest />} />
-                <Route path="/test-connection" element={<TestConnection />} />
-
-                {/* Protected Routes */}
-                <Route path="/mypage" element={<ProtectedRoute><MyPage /></ProtectedRoute>} />
-                <Route path="/corporatehome" element={<ProtectedRoute><CorporateHome /></ProtectedRoute>} />
-                <Route path="/applicantlist" element={<ProtectedRoute><ApplicantList /></ProtectedRoute>} />
-                <Route path="/email" element={<ProtectedRoute><Email /></ProtectedRoute>} />
-                <Route path="/postrecruitment" element={<ProtectedRoute><PostRecruitment /></ProtectedRoute>} />
-                <Route path="/company/jobposts/:id" element={<ProtectedRoute><CommonViewPost /></ProtectedRoute>} />
-                <Route path="/viewpost/:jobPostId" element={<ProtectedRoute><ViewPost /></ProtectedRoute>} />
-                <Route path="/passedapplicants/:jobPostId" element={<ProtectedRoute><PassedApplicants /></ProtectedRoute>} />
-                <Route path="/editpost/:jobPostId" element={<ProtectedRoute><EditPost /></ProtectedRoute>} />
-                <Route path="/rejectedapplicants/:jobPostId" element={<ProtectedRoute><RejectedApplicants /></ProtectedRoute>} />
-                <Route path="/managerschedule" element={<ProtectedRoute><ManagerSchedule /></ProtectedRoute>} />
-                <Route path="/memberschedule" element={<ProtectedRoute><MemberSchedule /></ProtectedRoute>} />
-                <Route path="/applicantlist/:jobPostId" element={<ProtectedRoute><ApplicantList /></ProtectedRoute>} />
-              </Routes>
-              {user && user.role !== 'guest' && <Chatbot />}
-            </div>
-          </ThemeProvider>
-        </ChakraProvider>
-      </BrowserRouter>
+        <AppRoutes />
       </AuthProvider>
     </ErrorBoundary>
   );

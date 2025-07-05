@@ -16,6 +16,12 @@ def get_public_job_posts(
 ):
     """지원자가 볼 수 있는 공개 채용공고 목록"""
     job_posts = db.query(JobPost).filter(JobPost.status == "ACTIVE").offset(skip).limit(limit).all()
+    
+    # Add company name to each job post
+    for job_post in job_posts:
+        if job_post.company:
+            job_post.companyName = job_post.company.name
+    
     return job_posts
 
 
@@ -32,5 +38,9 @@ def get_public_job_post(
     
     if not job_post:
         raise HTTPException(status_code=404, detail="Job post not found")
+    
+    # Add company name to the response
+    if job_post.company:
+        job_post.companyName = job_post.company.name
     
     return job_post 

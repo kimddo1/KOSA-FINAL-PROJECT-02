@@ -20,14 +20,27 @@ export const AuthProvider = ({ children }) => {
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
-    const userInfo = localStorage.getItem('user');
-    if (token && userInfo) {
-      setUser(JSON.parse(userInfo));
-    } else {
-      setUser(guestUser);
-    }
-    setIsLoading(false);
+    const initializeAuth = async () => {
+      const token = localStorage.getItem('token');
+      const userInfo = localStorage.getItem('user');
+      
+      if (token && userInfo) {
+        try {
+          // Try to validate token with backend
+          const userResponse = await api.get('/auth/me');
+          setUser(userResponse.data);
+        } catch (error) {
+          console.warn('Token validation failed, using local storage data');
+          // Fallback to local storage data
+          setUser(JSON.parse(userInfo));
+        }
+      } else {
+        setUser(guestUser);
+      }
+      setIsLoading(false);
+    };
+
+    initializeAuth();
   }, []);
 
   const login = async (email, password) => {
@@ -38,16 +51,22 @@ export const AuthProvider = ({ children }) => {
       
       localStorage.setItem('token', access_token);
       
-      const userResponse = await api.get('/auth/me');
-      const userData = userResponse.data;
+      // Get user info
+      let userData;
+      try {
+        const userResponse = await api.get('/auth/me');
+        userData = userResponse.data;
+      } catch (error) {
+        // If backend is not available, use the user data from login response
+        userData = response.data.user || { email, role: 'user' };
+      }
       
       localStorage.setItem('user', JSON.stringify(userData));
       setUser(userData);
       return true;
     } catch (err) {
-      setError(err.response?.status === 401 
-        ? '이메일 또는 비밀번호가 올바르지 않습니다.' 
-        : '로그인 실패');
+      console.error('Login error:', err);
+      setError(err.response?.data?.message || '로그인 실패');
       setUser(guestUser);
       return false;
     }

@@ -29,6 +29,14 @@ nosetests.xml
 coverage.xml
 *.cover
 
+# === ChromaDB / Vector Database ===
+agent/chroma_db/
+**/chroma_db/
+*.bin
+*.index
+*.faiss
+*.pkl
+
 # === Node.js / React / Vite ===
 node_modules/
 dist/

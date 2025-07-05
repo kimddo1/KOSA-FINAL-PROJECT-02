@@ -50,6 +50,27 @@ services:
       - app-net
     command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
 
+  agent:
+    build:
+      context: .
+      dockerfile: agent/Dockerfile
+    container_name: kocruit_agent
+    ports:
+      - "8001:8001"
+    env_file:
+      - .env
+    environment:
+      - REDIS_URL=redis://redis:6379
+      - OPENAI_API_KEY=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
+    depends_on:
+      - redis
+    volumes:
+      - ./agent:/app
+      - ./.env:/app/.env
+    networks:
+      - app-net
+    command: uvicorn main:app --host 0.0.0.0 --port 8001 --reload
+
   frontend:
     image: node:18-alpine
     container_name: kocruit_react
@@ -62,6 +83,15 @@ services:
     environment:
       - CHOKIDAR_USEPOLLING=true
     command: sh -c "npm install && npm run dev -- --host"
+    networks:
+      - app-net
+
+  redis:
+    image: redis:7.2-alpine
+    container_name: kosa-redis
+    ports:
+      - "6379:6379"
+    restart: always
     networks:
       - app-net
 

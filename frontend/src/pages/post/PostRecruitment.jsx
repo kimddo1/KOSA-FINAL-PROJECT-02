@@ -87,13 +87,14 @@ function PostRecruitment() {
         console.log('User company info:', {
           companyId: response.data.companyId,
           company_id: response.data.company_id,
-          company: response.data.company
+          company: response.data.company,
+          companyName: response.data.companyName
         });
         if (response.data) {
           setFormData(prev => ({
             ...prev,
             company: {
-              id: response.data.companyId,
+              id: response.data.company_id,
               name: response.data.companyName
             }
           }));
@@ -110,7 +111,7 @@ function PostRecruitment() {
   const isFieldEmpty = (value) => value === null || value === undefined || value === '';
   const isTeamValid = teamMembers.length > 0 && teamMembers.every(m => m.email && m.role);
   const isScheduleValid = schedules.length > 0 && schedules.every(s => s.date && s.time && s.place);
-  const isRecruitInfoValid = [formData.title, formData.department, formData.qualifications, formData.conditions, formData.jobDetails, formData.procedure, formData.headcount, formData.startDate, formData.endDate, formData.location, formData.employmentType].every(v => !isFieldEmpty(v));
+  const isRecruitInfoValid = [formData.title, formData.department, formData.qualifications, formData.conditions, formData.jobDetails, formData.procedures, formData.headcount, formData.startDate, formData.endDate, formData.location, formData.employmentType].every(v => !isFieldEmpty(v));
   const isReady = isRecruitInfoValid && isTeamValid && isScheduleValid;
   const [showError, setShowError] = useState(false);
 
@@ -234,13 +235,13 @@ function PostRecruitment() {
               <div className="bg-white dark:bg-gray-800 rounded border border-gray-300 dark:border-gray-400 p-4">
                 <h4 className="text-lg font-semibold ml-4 pb-2 dark:text-white">전형절차</h4>
                 <textarea 
-                  ref={procedureRef}
-                  value={formData.procedure} 
-                  onChange={(e) => handleTextareaChange(e, 'procedure')} 
-                  className={`w-full min-h-[100px] overflow-hidden resize-none rounded p-4 outline-none border-t border-gray-300 dark:border-gray-600 pt-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white ${showError && !formData.procedure ? 'border-2 border-red-500' : ''}`} 
+                  ref={proceduresRef}
+                  value={formData.procedures} 
+                  onChange={(e) => handleTextareaChange(e, 'procedures')} 
+                  className={`w-full min-h-[100px] overflow-hidden resize-none rounded p-4 outline-none border-t border-gray-300 dark:border-gray-600 pt-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white ${showError && !formData.procedures ? 'border-2 border-red-500' : ''}`} 
                   placeholder="예: 서류 → 면접 → 합격" 
                 />
-                {showError && !formData.procedure && <div className="text-red-500 text-xs text-left">전형절차를 입력하세요.</div>}
+                {showError && !formData.procedures && <div className="text-red-500 text-xs text-left">전형절차를 입력하세요.</div>}
               </div>
             </div>
 

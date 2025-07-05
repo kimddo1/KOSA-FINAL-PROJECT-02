@@ -14,15 +14,32 @@ import {
   useColorModeValue,
   SlideFade,
   ScaleFade,
-  Icon
+  Icon,
+  useToast
 } from '@chakra-ui/react';
 import {
   ChatIcon,
   CloseIcon,
   ArrowForwardIcon
 } from '@chakra-ui/icons';
+import axios from 'axios';
+import { useLocation } from 'react-router-dom';
+
+// 챗봇 전용 axios 인스턴스
+const chatbotApi = axios.create({
+  baseURL: 'http://localhost:8001',
+  headers: {
+    'Content-Type': 'application/json',
+  },
+  timeout: 10000,
+});
 
 const Chatbot = () => {
+  // 모든 훅을 최상단에 배치 (순서 중요!)
+  const location = useLocation();
+  const toast = useToast();
+  
+  // useState 훅들
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState([
     {
@@ -38,8 +55,18 @@ const Chatbot = () => {
   const [isResizing, setIsResizing] = useState(false);
   const [resizeDirection, setResizeDirection] = useState('');
   const [resizeStart, setResizeStart] = useState({ x: 0, y: 0, width: 0, height: 0 });
+  const [sessionId, setSessionId] = useState(null);
+  
+  // useRef 훅들
   const messagesEndRef = useRef(null);
   const chatRef = useRef(null);
+
+  // useColorModeValue 훅들
+  const bgColor = useColorModeValue('white', 'gray.800');
+  const borderColor = useColorModeValue('gray.200', 'gray.600');
+  const userMessageBg = useColorModeValue('blue.500', 'blue.400');
+  const botMessageBg = useColorModeValue('gray.100', 'gray.700');
+  const messageAreaBg = useColorModeValue('gray.50', 'gray.900');
 
   const quickReplies = [
     "채용공고 등록 방법",
@@ -48,10 +75,94 @@ const Chatbot = () => {
     "주요 기능 안내"
   ];
 
-  const bgColor = useColorModeValue('white', 'gray.800');
-  const borderColor = useColorModeValue('gray.200', 'gray.600');
-  const userMessageBg = useColorModeValue('blue.500', 'blue.400');
-  const botMessageBg = useColorModeValue('gray.100', 'gray.700');
+  // 페이지 컨텍스트 수집
+  const getPageContext = () => {
+    const context = {
+      pathname: location.pathname,
+      search: location.search,
+      pageTitle: document.title,
+      timestamp: new Date().toISOString()
+    };
+
+    // 주요 DOM 요소들 수집
+    try {
+      const forms = Array.from(document.querySelectorAll('form')).map(form => ({
+        id: form.id || null,
+        className: form.className || null,
+        action: form.action || null
+      }));
+
+      const inputs = Array.from(document.querySelectorAll('input, textarea, select')).map(input => ({
+        id: input.id || null,
+        name: input.name || null,
+        type: input.type || input.tagName.toLowerCase(),
+        placeholder: input.placeholder || null,
+        value: input.value || null,
+        className: input.className || null
+      }));
+
+      const buttons = Array.from(document.querySelectorAll('button')).map(button => ({
+        id: button.id || null,
+        text: button.textContent?.trim() || null,
+        className: button.className || null
+      }));
+
+      context.domElements = {
+        forms: forms.slice(0, 5), // 최대 5개만
+        inputs: inputs.slice(0, 10), // 최대 10개만
+        buttons: buttons.slice(0, 10) // 최대 10개만
+      };
+    } catch (error) {
+      console.warn('DOM 요소 수집 중 오류:', error);
+      context.domElements = { forms: [], inputs: [], buttons: [] };
+    }
+
+    return context;
+  };
+
+  // 페이지별 설명 매핑
+  const getPageDescription = (pathname) => {
+    const pageMap = {
+      '/': '메인 홈페이지',
+      '/login': '로그인 페이지',
+      '/signup': '회원가입 페이지',
+      '/joblist': '채용공고 목록 페이지',
+      '/mypage': '마이페이지',
+      '/corporatehome': '기업 홈페이지',
+      '/applicantlist': '지원자 목록 페이지',
+      '/postrecruitment': '채용공고 등록 페이지',
+      '/email': '이메일 발송 페이지',
+      '/managerschedule': '매니저 일정 관리 페이지',
+      '/memberschedule': '멤버 일정 관리 페이지'
+    };
+    return pageMap[pathname] || '알 수 없는 페이지';
+  };
+
+  // 세션 초기화
+  useEffect(() => {
+    if (isOpen && !sessionId) {
+      initializeSession();
+    }
+  }, [isOpen, sessionId]);
+
+  const initializeSession = async () => {
+    try {
+      const response = await chatbotApi.get('/chat/session/new');
+      if (response.data.session_id) {
+        setSessionId(response.data.session_id);
+        console.log('새 세션 생성:', response.data.session_id);
+      }
+    } catch (error) {
+      console.error('세션 생성 실패:', error);
+      toast({
+        title: "연결 오류",
+        description: "챗봇 서버에 연결할 수 없습니다.",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    }
+  };
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -78,7 +189,7 @@ const Chatbot = () => {
     handleSendMessage(reply);
   };
 
-  const handleSendMessage = (customMessage = null) => {
+  const handleSendMessage = async (customMessage = null) => {
     const messageToSend = customMessage || inputMessage;
     if (messageToSend.trim() === '') return;
 
@@ -93,36 +204,61 @@ const Chatbot = () => {
     setInputMessage('');
     setIsTyping(true);
 
-    // 봇 응답 시뮬레이션
-    setTimeout(() => {
-      const botResponse = {
+    try {
+      // 페이지 컨텍스트 수집
+      const pageContext = getPageContext();
+      
+      // 에이전트 API 호출 (페이지 컨텍스트 포함)
+      const response = await chatbotApi.post('/chat/', {
+        session_id: sessionId,
+        message: messageToSend,
+        page_context: pageContext
+      });
+
+      if (response.data.ai_response) {
+        const botResponse = {
+          id: messages.length + 2,
+          text: response.data.ai_response,
+          sender: 'bot',
+          timestamp: new Date(),
+          pageSuggestions: response.data.page_suggestions || [],
+          domActions: response.data.dom_actions || []
+        };
+        setMessages(prev => [...prev, botResponse]);
+        
+        // 페이지 제안이나 DOM 액션이 있다면 처리
+        if (response.data.page_suggestions) {
+          console.log('페이지 제안:', response.data.page_suggestions);
+        }
+        if (response.data.dom_actions) {
+          console.log('DOM 액션:', response.data.dom_actions);
+          // 여기서 DOM 액션을 실행할 수 있습니다
+        }
+      } else {
+        throw new Error('응답이 없습니다.');
+      }
+    } catch (error) {
+      console.error('챗봇 API 호출 실패:', error);
+      
+      // 에러 메시지 표시
+      const errorMessage = {
         id: messages.length + 2,
-        text: getBotResponse(messageToSend),
+        text: "죄송합니다. 일시적인 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
         sender: 'bot',
         timestamp: new Date(),
+        isError: true
       };
-      setMessages(prev => [...prev, botResponse]);
+      setMessages(prev => [...prev, errorMessage]);
+      
+      toast({
+        title: "연결 오류",
+        description: "챗봇 서버에 연결할 수 없습니다.",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    } finally {
       setIsTyping(false);
-    }, 1500);
-  };
-
-  const getBotResponse = (message) => {
-    const lowerMessage = message.toLowerCase();
-    
-    if (lowerMessage.includes('안녕') || lowerMessage.includes('hello')) {
-      return '안녕하세요! 코크루트에서 도움이 필요하시면 언제든 말씀해 주세요.';
-    } else if (lowerMessage.includes('채용') || lowerMessage.includes('구인') || lowerMessage.includes('등록')) {
-      return '채용공고 등록 방법:\n1. 상단 메뉴에서 "채용공고 등록" 클릭\n2. 필요한 정보 입력 (제목, 내용, 자격요건 등)\n3. 저장 후 공고 게시\n\n자세한 내용은 "채용공고 등록" 페이지에서 확인하실 수 있습니다.';
-    } else if (lowerMessage.includes('지원') || lowerMessage.includes('이력서')) {
-      return '지원자 관리 방법:\n1. "지원자 목록" 메뉴에서 지원자 확인\n2. 이력서 다운로드 및 검토\n3. 합격/불합격 처리\n4. 면접 일정 조율\n\n지원자별 상세 정보와 이력서를 확인할 수 있습니다.';
-    } else if (lowerMessage.includes('일정') || lowerMessage.includes('면접')) {
-      return '면접 일정 관리:\n1. "일정 관리" 메뉴에서 면접 일정 확인\n2. 새로운 면접 일정 등록\n3. 면접관 배정\n4. 지원자에게 알림 발송\n\n캘린더 형태로 직관적인 일정 관리가 가능합니다.';
-    } else if (lowerMessage.includes('도움') || lowerMessage.includes('help')) {
-      return '코크루트는 채용 관리 플랫폼입니다. 채용공고 등록, 지원자 관리, 면접 일정 관리 등의 기능을 제공합니다.';
-    } else if (lowerMessage.includes('기능') || lowerMessage.includes('메뉴')) {
-      return '주요 기능:\n1) 채용공고 등록/관리\n2) 지원자 목록 확인\n3) 면접 일정 관리\n4) 이메일 발송\n5) 통계 확인\n\n각 메뉴에서 해당 기능을 이용하실 수 있습니다.';
-    } else {
-      return '죄송합니다. 더 구체적으로 말씀해 주시면 더 정확한 답변을 드릴 수 있습니다.\n\n빠른 응답 버튼을 이용해 보세요!';
     }
   };
 
@@ -227,7 +363,9 @@ const Chatbot = () => {
                   <Avatar size="sm" bg="white" color="blue.500" icon={<ChatIcon />} />
                   <Box>
                     <Text fontWeight="semibold">코크루트 챗봇</Text>
-                    <Text fontSize="sm" opacity={0.8}>실시간 도움말 (모서리 드래그로 크기 조절)</Text>
+                    <Text fontSize="sm" opacity={0.8}>
+                      {sessionId ? `${getPageDescription(location.pathname)} - AI 연결됨` : '연결 중...'}
+                    </Text>
                   </Box>
                 </Flex>
                 <IconButton
@@ -247,7 +385,7 @@ const Chatbot = () => {
               overflowY="auto"
               p={4}
               spacing={3}
-              bg={useColorModeValue('gray.50', 'gray.900')}
+              bg={messageAreaBg}
             >
               {messages.map((message) => (
                 <Box
@@ -256,8 +394,10 @@ const Chatbot = () => {
                   maxW="80%"
                 >
                   <Box
-                    bg={message.sender === 'user' ? userMessageBg : botMessageBg}
-                    color={message.sender === 'user' ? 'white' : 'inherit'}
+                    bg={message.sender === 'user' ? userMessageBg : 
+                        message.isError ? 'red.100' : botMessageBg}
+                    color={message.sender === 'user' ? 'white' : 
+                           message.isError ? 'red.800' : 'inherit'}
                     p={3}
                     borderRadius="lg"
                     boxShadow="sm"
@@ -282,24 +422,30 @@ const Chatbot = () => {
                         h={2}
                         bg="gray.400"
                         borderRadius="full"
-                        animation="bounce 1.4s infinite ease-in-out"
-                        animationDelay="0s"
+                        sx={{
+                          animation: 'bounce 1.4s infinite ease-in-out',
+                          animationDelay: '0s'
+                        }}
                       />
                       <Box
                         w={2}
                         h={2}
                         bg="gray.400"
                         borderRadius="full"
-                        animation="bounce 1.4s infinite ease-in-out"
-                        animationDelay="0.16s"
+                        sx={{
+                          animation: 'bounce 1.4s infinite ease-in-out',
+                          animationDelay: '0.16s'
+                        }}
                       />
                       <Box
                         w={2}
                         h={2}
                         bg="gray.400"
                         borderRadius="full"
-                        animation="bounce 1.4s infinite ease-in-out"
-                        animationDelay="0.32s"
+                        sx={{
+                          animation: 'bounce 1.4s infinite ease-in-out',
+                          animationDelay: '0.32s'
+                        }}
                       />
                     </HStack>
                   </Box>
@@ -307,7 +453,7 @@ const Chatbot = () => {
               )}
 
               {/* 빠른 응답 버튼들 */}
-              {messages.length === 1 && !isTyping && (
+              {messages.length === 1 && !isTyping && sessionId && (
                 <HStack spacing={2} flexWrap="wrap" justify="flex-start" w="100%">
                   {quickReplies.map((reply, index) => (
                     <Badge
@@ -338,14 +484,14 @@ const Chatbot = () => {
                   value={inputMessage}
                   onChange={(e) => setInputMessage(e.target.value)}
                   onKeyPress={handleKeyPress}
-                  placeholder="메시지를 입력하세요..."
-                  disabled={isTyping}
+                  placeholder={sessionId ? "메시지를 입력하세요..." : "연결 중..."}
+                  disabled={isTyping || !sessionId}
                   size="sm"
                 />
                 <IconButton
                   colorScheme="blue"
                   onClick={() => handleSendMessage()}
-                  disabled={inputMessage.trim() === '' || isTyping}
+                  disabled={inputMessage.trim() === '' || isTyping || !sessionId}
                   icon={<ArrowForwardIcon />}
                   size="sm"
                   _hover={{ transform: 'scale(1.1)' }}
@@ -418,7 +564,7 @@ const Chatbot = () => {
         )}
       </SlideFade>
 
-      <style jsx>{`
+      <style>{`
         @keyframes bounce {
           0%, 80%, 100% {
             transform: scale(0);
