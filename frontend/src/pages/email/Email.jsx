@@ -1,11 +1,45 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Layout from '../../layout/Layout';
 import { FaPaperPlane, FaClock } from 'react-icons/fa';
+import { useLocation } from 'react-router-dom';
 
 function Email() {
+  const location = useLocation();
+  const { applicants, applicant, interviewInfo } = location.state || {};
+
   const [recipient, setRecipient] = useState('');
   const [subject, setSubject] = useState('');
   const [body, setBody] = useState('');
+
+  // 템플릿 자동 완성 (여러 명 지원)
+  useEffect(() => {
+    if (Array.isArray(applicants) && applicants.length > 0 && interviewInfo) {
+      setRecipient(applicants.map(a => a.email).join(', '));
+      setSubject(`면접 안내 (${applicants.length}명)`);
+      setBody(
+        applicants.map(a =>
+          `${a.name}님,\n` +
+          `아래와 같이 면접 일정을 안내드립니다.\n` +
+          `- 일시: ${interviewInfo.date} ${interviewInfo.time}\n` +
+          `- 장소: ${interviewInfo.place}\n` +
+          (interviewInfo.memo ? `- 메모: ${interviewInfo.memo}\n` : '') +
+          `\n`
+        ).join('\n---------------------\n') +
+        `감사합니다.`
+      );
+    } else if (applicant && interviewInfo) {
+      setRecipient(applicant.email || '');
+      setSubject(`${applicant.name}님 면접 안내`);
+      setBody(
+        `${applicant.name}님,\n\n` +
+        `아래와 같이 면접 일정을 안내드립니다.\n` +
+        `- 일시: ${interviewInfo.date} ${interviewInfo.time}\n` +
+        `- 장소: ${interviewInfo.place}\n` +
+        (interviewInfo.memo ? `- 메모: ${interviewInfo.memo}\n` : '') +
+        `\n감사합니다.`
+      );
+    }
+  }, [applicants, applicant, interviewInfo]);
 
   return (
     <Layout>

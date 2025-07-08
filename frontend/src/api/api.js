@@ -1,17 +1,5 @@
 // src/api/api.js
 import axios from 'axios';
-import mockApi from './mockApi';
-
-// Check if backend is available
-const isBackendAvailable = async () => {
-  try {
-    await axios.get('http://localhost:8000/api/v1/health', { timeout: 2000 });
-    return true;
-  } catch (error) {
-    console.warn('Backend not available, using mock API');
-    return false;
-  }
-};
 
 const api = axios.create({
   baseURL: 'http://localhost:8000/api/v1', // 백엔드 주소에 맞게 수정
@@ -19,7 +7,7 @@ const api = axios.create({
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 10000, // 10초 타임아웃
+  timeout: 10000, // 5초 타임아웃
 });
 
 // 요청 전 인터셉터: 토큰이 있다면 자동으로 추가
@@ -66,55 +54,4 @@ api.interceptors.response.use(
   }
 );
 
-// Enhanced API with fallback to mock
-const enhancedApi = {
-  async post(url, data) {
-    try {
-      return await api.post(url, data);
-    } catch (error) {
-      if (error.code === 'ECONNREFUSED' || error.code === 'ERR_NETWORK') {
-        console.log('Using mock API for POST:', url);
-        return await mockApi.post(url, data);
-      }
-      throw error;
-    }
-  },
-
-  async get(url) {
-    try {
-      return await api.get(url);
-    } catch (error) {
-      if (error.code === 'ECONNREFUSED' || error.code === 'ERR_NETWORK') {
-        console.log('Using mock API for GET:', url);
-        return await mockApi.get(url);
-      }
-      throw error;
-    }
-  },
-
-  async put(url, data) {
-    try {
-      return await api.put(url, data);
-    } catch (error) {
-      if (error.code === 'ECONNREFUSED' || error.code === 'ERR_NETWORK') {
-        console.log('Using mock API for PUT:', url);
-        return await mockApi.put(url, data);
-      }
-      throw error;
-    }
-  },
-
-  async delete(url) {
-    try {
-      return await api.delete(url);
-    } catch (error) {
-      if (error.code === 'ECONNREFUSED' || error.code === 'ERR_NETWORK') {
-        console.log('Using mock API for DELETE:', url);
-        return await mockApi.delete(url);
-      }
-      throw error;
-    }
-  }
-};
-
-export default enhancedApi;
+export default api;

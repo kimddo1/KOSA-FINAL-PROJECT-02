@@ -31,7 +31,6 @@ const ProtectedRoute = ({ children, requiredRole }) => {
   path.startsWith('/joblist') ||
   path.startsWith('/common/');
 
-
   // Check if user's role has access to the current path
   const hasAccess = () => {
     const userRole = user?.role || ROLES.GUEST;
@@ -47,7 +46,7 @@ const ProtectedRoute = ({ children, requiredRole }) => {
     return allowedPaths && allowedPaths.some(path => currentPath.startsWith(path));
   };
   
-  // 로그인 안 된 경우 → 로그인 페이지로 리다이렉트
+  // 로그인 체크
   if (!user || user.role === ROLES.GUEST) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
@@ -57,6 +56,7 @@ const ProtectedRoute = ({ children, requiredRole }) => {
     return children;
   }
 
+  // 권한 체크
   if (!hasAccess()) {
     // 로그인은 되어 있지만 권한 부족
     return (

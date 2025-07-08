@@ -109,7 +109,9 @@ function NavBar() {
 
           {/* Show current user role */}
           {!isGuest && (
-            <span className="text-xs text-gray-500 dark:text-gray-300 font-semibold">{user.role}</span>
+            <span className="text-xs text-gray-500 dark:text-gray-300 font-semibold">
+              {user.role} {user.email === 'dev@test.com' ? '(개발자)' : ''}
+            </span>
           )}
 
           {/* Profile Icon or Auth Buttons */}

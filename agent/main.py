@@ -3,13 +3,19 @@ from fastapi.middleware.cors import CORSMiddleware
 from agents.graph_agent import build_graph
 from agents.chatbot_graph import create_chatbot_graph, initialize_chat_state, create_session_id
 from agents.chatbot_node import ChatbotNode
+from redis_monitor import RedisMonitor
+from scheduler import RedisScheduler
 from dotenv import load_dotenv
 import uuid
 import os
 
 load_dotenv()
 
-app = FastAPI()
+app = FastAPI(
+    title="AI Agent API",
+    description="AI Agent for KOCruit Project",
+    version="1.0.0"
+)
 
 # CORS 미들웨어 추가
 app.add_middleware(
@@ -19,6 +25,21 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+@app.get("/")
+async def root():
+    """루트 경로 - API 정보 반환"""
+    return {
+        "message": "AI Agent API is running",
+        "version": "1.0.0",
+        "endpoints": {
+            "chat": "/chat/",
+            "chat_session": "/chat/session/new",
+            "monitor_health": "/monitor/health",
+            "monitor_sessions": "/monitor/sessions",
+            "docs": "/docs"
+        }
+    }
 
 # OpenAI API 키가 있을 때만 그래프 초기화
 try:
@@ -33,6 +54,16 @@ except Exception as e:
     print(f"Error initializing agents: {e}")
     graph_agent = None
     chatbot_graph = None
+
+# Redis 모니터링 시스템 초기화
+try:
+    redis_monitor = RedisMonitor()
+    scheduler = RedisScheduler(redis_monitor)
+    print("Redis monitoring system initialized successfully.")
+except Exception as e:
+    print(f"Error initializing Redis monitor: {e}")
+    redis_monitor = None
+    scheduler = None
 
 @app.post("/run/")
 async def run(request: Request):
@@ -133,3 +164,155 @@ async def create_new_session():
     """새로운 세션 생성"""
     session_id = create_session_id()
     return {"session_id": session_id}
+
+# Redis 모니터링 엔드포인트들
+@app.get("/monitor/health")
+async def get_redis_health():
+    """Redis 상태 확인"""
+    if redis_monitor is None:
+        return {"error": "Redis monitor not initialized"}
+    return redis_monitor.get_health_status()
+
+@app.get("/monitor/sessions")
+async def get_session_statistics():
+    """세션 통계 정보"""
+    if redis_monitor is None:
+        return {"error": "Redis monitor not initialized"}
+    return redis_monitor.get_session_statistics()
+
+@app.post("/monitor/cleanup")
+async def cleanup_sessions():
+    """만료된 세션 정리"""
+    if redis_monitor is None:
+        return {"error": "Redis monitor not initialized"}
+    return redis_monitor.cleanup_expired_sessions()
+
+@app.post("/monitor/backup")
+async def backup_conversations(request: Request):
+    """대화 기록 백업"""
+    if redis_monitor is None:
+        return {"error": "Redis monitor not initialized"}
+    
+    data = await request.json()
+    backup_name = data.get("backup_name")
+    return redis_monitor.backup_conversations(backup_name)
+
+@app.post("/monitor/restore")
+async def restore_conversations(request: Request):
+    """대화 기록 복구"""
+    if redis_monitor is None:
+        return {"error": "Redis monitor not initialized"}
+    
+    data = await request.json()
+    backup_file = data.get("backup_file")
+    if not backup_file:
+        return {"error": "backup_file is required"}
+    
+    return redis_monitor.restore_conversations(backup_file)
+
+@app.get("/monitor/backups")
+async def get_backup_list():
+    """백업 파일 목록"""
+    if redis_monitor is None:
+        return {"error": "Redis monitor not initialized"}
+    return redis_monitor.get_backup_list()
+
+@app.delete("/monitor/backup/{backup_name}")
+async def delete_backup(backup_name: str):
+    """백업 파일 삭제"""
+    if redis_monitor is None:
+        return {"error": "Redis monitor not initialized"}
+    return redis_monitor.delete_backup(backup_name)
+
+@app.post("/monitor/memory-limit")
+async def set_memory_limit(request: Request):
+    """메모리 제한 설정"""
+    if redis_monitor is None:
+        return {"error": "Redis monitor not initialized"}
+    
+    data = await request.json()
+    max_memory_mb = data.get("max_memory_mb", 512)
+    return redis_monitor.set_memory_limit(max_memory_mb)
+
+@app.post("/monitor/start")
+async def start_monitoring():
+    """모니터링 시작"""
+    if redis_monitor is None:
+        return {"error": "Redis monitor not initialized"}
+    
+    redis_monitor.start_monitoring()
+    return {"message": "Monitoring started"}
+
+@app.post("/monitor/stop")
+async def stop_monitoring():
+    """모니터링 중지"""
+    if redis_monitor is None:
+        return {"error": "Redis monitor not initialized"}
+    
+    redis_monitor.stop_monitoring()
+    return {"message": "Monitoring stopped"}
+
+@app.post("/monitor/auto-cleanup/enable")
+async def enable_auto_cleanup():
+    """자동 정리 활성화"""
+    if redis_monitor is None:
+        return {"error": "Redis monitor not initialized"}
+    
+    redis_monitor.enable_auto_cleanup()
+    return {"message": "Auto cleanup enabled"}
+
+@app.post("/monitor/auto-cleanup/disable")
+async def disable_auto_cleanup():
+    """자동 정리 비활성화"""
+    if redis_monitor is None:
+        return {"error": "Redis monitor not initialized"}
+    
+    redis_monitor.disable_auto_cleanup()
+    return {"message": "Auto cleanup disabled"}
+
+@app.post("/monitor/scheduler/start")
+async def start_scheduler():
+    """스케줄러 시작"""
+    if scheduler is None:
+        return {"error": "Scheduler not initialized"}
+    
+    asyncio.create_task(scheduler.start())
+    return {"message": "Scheduler started"}
+
+@app.post("/monitor/scheduler/stop")
+async def stop_scheduler():
+    """스케줄러 중지"""
+    if scheduler is None:
+        return {"error": "Scheduler not initialized"}
+    
+    await scheduler.stop()
+    return {"message": "Scheduler stopped"}
+
+@app.get("/monitor/scheduler/status")
+async def get_scheduler_status():
+    """스케줄러 상태 확인"""
+    if scheduler is None:
+        return {"error": "Scheduler not initialized"}
+    
+    return scheduler.get_scheduler_status()
+
+@app.post("/monitor/cleanup/manual")
+async def manual_cleanup():
+    """수동 정리 실행"""
+    if scheduler is None:
+        return {"error": "Scheduler not initialized"}
+    
+    result = await scheduler.run_manual_cleanup()
+    return result
+
+@app.post("/monitor/backup/manual")
+async def manual_backup(request: Request):
+    """수동 백업 실행"""
+    if scheduler is None:
+        return {"error": "Scheduler not initialized"}
+    
+    data = await request.json()
+    backup_name = data.get("backup_name")
+    
+    result = await scheduler.run_manual_backup(backup_name)
+    return result

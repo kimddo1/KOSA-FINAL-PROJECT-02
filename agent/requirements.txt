@@ -18,6 +18,9 @@ sentence-transformers==3.0.1
 # Memory and State Management
 redis>=4.0.0
 
+# Monitoring and System
+psutil==5.9.5
+
 # Utilities
 python-dotenv==1.0.1
 pydantic==2.9.2

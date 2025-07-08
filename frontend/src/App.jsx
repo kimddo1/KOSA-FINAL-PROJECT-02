@@ -18,6 +18,7 @@ import PartnerDetail from './pages/partner/PartnerDetail.jsx';
 import ViewPost from './pages/post/ViewPost.jsx';
 import EditPost from './pages/post/EditPost.jsx';
 import PassedApplicants from "./pages/applicant/PassedApplicants.jsx";
+
 import RejectedApplicants from "./pages/applicant/RejectedApplicants.jsx";
 import ManagerSchedule from './pages/schedule/ManagerSchedule.jsx';
 import MemberSchedule from './pages/schedule/MemberSchedule.jsx';

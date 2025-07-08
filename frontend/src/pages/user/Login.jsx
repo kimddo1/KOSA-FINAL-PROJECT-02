@@ -22,13 +22,17 @@ function Login() {
     const success = await login(form.email, form.password);
     setIsLoading(false);
 
-    const user = JSON.parse(localStorage.getItem('user'));
-
     if (success) {
-      if (user && ['ADMIN', 'MANAGER', 'MEMBER', 'EMP'].includes(user.role)) {
+      // 개발자 계정이면 기업 홈으로, 일반 사용자는 역할에 따라 이동
+      if (form.email === 'dev@test.com') {
         navigate('/corporatehome');
       } else {
-        navigate('/');
+        const user = JSON.parse(localStorage.getItem('user'));
+        if (user && ['ADMIN', 'MANAGER', 'MEMBER', 'EMP'].includes(user.role)) {
+          navigate('/corporatehome');
+        } else {
+          navigate('/');
+        }
       }
     } else {
       setError('로그인 실패. 이메일과 비밀번호를 확인하세요.');

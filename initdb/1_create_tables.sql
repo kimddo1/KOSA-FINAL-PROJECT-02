@@ -1,3 +1,5 @@
+USE kocruit;
+
 CREATE TABLE company (
     id      INT AUTO_INCREMENT PRIMARY KEY,
     name    VARCHAR(100) NOT NULL UNIQUE,
@@ -268,4 +270,11 @@ CREATE TABLE interview_question (
     question_text  VARCHAR(1000),
 
     FOREIGN KEY (application_id) REFERENCES application(id)
+);
+
+CREATE TABLE email_verification_tokens (
+    token VARCHAR(255) PRIMARY KEY,
+    email VARCHAR(255) NOT NULL,
+    is_verified BOOLEAN DEFAULT FALSE,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
