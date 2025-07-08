@@ -6,6 +6,7 @@ import ApplicantListSimple from './ApplicantListSimple';
 import ResumeCard from '../../components/ResumeCard';
 import InterviewPanel from './InterviewPanel';
 import api from '../../api/api';
+import { FiChevronLeft, FiChevronRight } from 'react-icons/fi';
 
 function InterviewProgress() {
   const { jobPostId } = useParams();
@@ -102,61 +103,69 @@ function InterviewProgress() {
     setEvaluation(prev => ({ ...prev, [item]: level }));
   };
 
-  if (loading || jobPostLoading) return <div className="flex h-screen items-center justify-center">로딩 중...</div>;
-  if (error) return <div className="flex h-screen items-center justify-center text-red-500">{error}</div>;
+  if (loading || jobPostLoading) return <div className="flex h-screen items-center justify-center dark:text-gray-100">로딩 중...</div>;
+  if (error) return <div className="flex h-screen items-center justify-center text-red-500 dark:text-red-400">{error}</div>;
 
   // 레이아웃: Navbar(상단), ViewPostSidebar(좌측), 나머지 flex
   return (
-    <div className="relative min-h-screen bg-[#f7faff] dark:bg-gray-900">
+    <div className="relative min-h-screen bg-[#f7faff] dark:bg-gray-900 text-gray-900 dark:text-gray-100">
       <Navbar />
       <ViewPostSidebar jobPost={jobPost} />
-      <div className="flex flex-row" style={{ paddingTop: 64, marginLeft: 90, height: 'calc(100vh - 64px)' }}>
-        {/* 좌측 지원자 리스트 */}
-        <div
-          className="border-r bg-white dark:bg-gray-800 h-full relative flex flex-col"
-          style={{ width: isLeftOpen ? leftWidth : 16, minWidth: 16, maxWidth: 400, transition: 'width 0.1s' }}
+      {/* 좌측 지원자 리스트: fixed */}
+      <div
+        className="fixed left-[90px] top-[64px] bg-white dark:bg-gray-800 border-r border-gray-300 dark:border-gray-600 flex flex-col"
+        style={{ width: isLeftOpen ? leftWidth : 16, height: 'calc(100vh - 64px)', zIndex: 1000 }}
+      >
+        {/* 닫기/열기 버튼 */}
+        <button
+          className="absolute top-2 right-2 z-30 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-full w-7 h-7 flex items-center justify-center shadow hover:bg-gray-300 dark:hover:bg-gray-600 transition"
+          style={{ right: isLeftOpen ? '-18px' : '-18px', left: isLeftOpen ? 'auto' : '0', zIndex: 30 }}
+          onClick={() => setIsLeftOpen(open => !open)}
+          aria-label={isLeftOpen ? '리스트 닫기' : '리스트 열기'}
         >
-          {/* 닫기/열기 버튼 */}
-          <button
-            className="absolute top-2 right-2 z-30 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-200 rounded-full w-7 h-7 flex items-center justify-center shadow hover:bg-gray-300 dark:hover:bg-gray-600 transition"
-            style={{ right: isLeftOpen ? '-18px' : '-18px', left: isLeftOpen ? 'auto' : '0', zIndex: 30 }}
-            onClick={() => setIsLeftOpen(open => !open)}
-          >
-            {isLeftOpen ? '<<' : '>>'}
-          </button>
-          {/* 드래그 핸들러 */}
-          {isLeftOpen && (
-            <div className="absolute top-0 right-0 w-2 h-full cursor-col-resize z-20" onMouseDown={handleMouseDown} />
-          )}
-          {/* 지원자 목록 */}
-          <div className="h-full overflow-y-auto pr-1 flex-1 flex flex-col">
-            {isLeftOpen ? (
-              <ApplicantListSimple
-                applicants={applicants}
-                splitMode={true}
-                selectedApplicantIndex={selectedApplicantIndex}
-                onSelectApplicant={handleApplicantClick}
-                handleApplicantClick={handleApplicantClick}
-                handleCloseDetailedView={() => {}}
-                calculateAge={() => ''}
-                compact={true}
-                style={{ width: '100%', height: '100%' }}
-              />
-            ) : null}
-          </div>
+          {isLeftOpen ? <FiChevronLeft size={20} /> : <FiChevronRight size={20} />}
+        </button>
+        {/* 드래그 핸들러 */}
+        {isLeftOpen && (
+          <div className="absolute top-0 right-0 w-2 h-full cursor-col-resize z-20" onMouseDown={handleMouseDown} />
+        )}
+        {/* 지원자 목록 */}
+        <div className="flex-1 min-h-0 flex flex-col overflow-y-auto pr-1">
+          {isLeftOpen ? (
+            <ApplicantListSimple
+              applicants={applicants}
+              splitMode={true}
+              selectedApplicantIndex={selectedApplicantIndex}
+              onSelectApplicant={handleApplicantClick}
+              handleApplicantClick={handleApplicantClick}
+              handleCloseDetailedView={() => {}}
+              calculateAge={() => ''}
+              compact={true}
+            />
+          ) : null}
         </div>
+      </div>
+      {/* 중앙/우측 패널: 좌측 패널 width만큼 margin-left */}
+      <div
+        className="flex flex-row"
+        style={{
+          paddingTop: 64,
+          marginLeft: (isLeftOpen ? leftWidth : 16) + 90,
+          height: 'calc(100vh - 64px)'
+        }}
+      >
         {/* 중앙 이력서 */}
-        <div className="flex-1 flex flex-col h-full bg-[#f7faff] dark:bg-gray-900">
+        <div className="flex-1 flex flex-col h-full min-h-0 bg-[#f7faff] dark:bg-gray-900">
           <div className="flex-1 h-full overflow-y-auto flex flex-col items-stretch justify-start">
             {resume ? (
               <ResumeCard resume={resume} />
             ) : (
-              <div className="text-gray-400 flex items-center justify-center h-full">지원자를 선택하세요</div>
+              <div className="text-gray-400 dark:text-gray-500 flex items-center justify-center h-full">지원자를 선택하세요</div>
             )}
           </div>
         </div>
         {/* 우측 면접 질문/메모 */}
-        <div className="w-[400px] border-l bg-white dark:bg-gray-100 h-full">
+        <div className="w-[400px] border-l border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 h-full min-h-0 flex flex-col">
           <div className="h-full overflow-y-auto">
             <InterviewPanel
               questions={questions}

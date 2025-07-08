@@ -9,6 +9,7 @@ import ApplicantListLeft from './ApplicantListLeft';
 import ResumeCard from '../../components/ResumeCard';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import api from '../../api/api';
+import ViewPostSidebar from '../../components/ViewPostSidebar';
 
 export default function ApplicantList() {
   const [bookmarkedList, setBookmarkedList] = useState([]);
@@ -28,6 +29,8 @@ export default function ApplicantList() {
   const isAdminOrManager = user && (user.role === ROLES.ADMIN || user.role === ROLES.MANAGER);
   const navigate = useNavigate();
   const { jobPostId } = useParams();
+  const [jobPost, setJobPost] = useState(null);
+  const [jobPostLoading, setJobPostLoading] = useState(true);
   const [expanded, setExpanded] = useState(null);
   
   // jobPostId가 없으면 기본값 사용
@@ -63,6 +66,21 @@ export default function ApplicantList() {
 
     if (effectiveJobPostId) fetchData();
   }, [effectiveJobPostId]);
+
+  useEffect(() => {
+    const fetchJobPost = async () => {
+      setJobPostLoading(true);
+      try {
+        const res = await api.get(`/company/jobposts/${jobPostId}`);
+        setJobPost(res.data);
+      } catch (err) {
+        setJobPost(null);
+      } finally {
+        setJobPostLoading(false);
+      }
+    };
+    if (jobPostId) fetchJobPost();
+  }, [jobPostId]);
 
   const handleDelete = async () => {
     if (window.confirm('이 지원자를 삭제하시겠습니까?')) {
@@ -172,9 +190,10 @@ export default function ApplicantList() {
     return age;
   };
 
-  if (loading) {
+  if (loading || jobPostLoading) {
     return (
       <Layout settingsButton={settingsButton}>
+        <ViewPostSidebar jobPost={jobPost} />
         <div className="h-screen flex items-center justify-center">
           <div className="text-xl">로딩 중...</div>
         </div>
@@ -185,6 +204,7 @@ export default function ApplicantList() {
   if (error) {
     return (
       <Layout settingsButton={settingsButton}>
+        <ViewPostSidebar jobPost={jobPost} />
         <div className="h-screen flex items-center justify-center">
           <div className="text-xl text-red-500">{error}</div>
         </div>
@@ -194,7 +214,8 @@ export default function ApplicantList() {
 
   return (
     <Layout settingsButton={settingsButton}>
-      <div className="h-screen flex flex-col">
+      <ViewPostSidebar jobPost={jobPost} />
+      <div className="h-screen flex flex-col" style={{ marginLeft: 90 }}>
         <div className="bg-white dark:bg-gray-800 shadow px-8 py-4 flex items-center justify-center">
           <div className="text-lg font-semibold text-gray-700 dark:text-gray-300">
             보안SW 개발자 신입/경력사원 모집 (<span className="text-blue-700 dark:text-blue-400">C, C++</span>) - 소프트웨어 개발자

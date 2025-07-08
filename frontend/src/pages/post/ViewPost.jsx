@@ -102,7 +102,7 @@ function ViewPost() {
     <>
       <ViewPostSidebar jobPost={jobPost} />
       <Layout title="채용공고 상세보기" settingsButton={settingsButton}>
-        <div className="min-h-screen bg-[#eef6ff] dark:bg-gray-900 p-6 mx-auto max-w-screen-xl" style={{ marginLeft: 80 }}>
+        <div className="min-h-screen bg-[#eef6ff] dark:bg-gray-900 p-6 mx-auto max-w-screen-xl" style={{ marginLeft: 90 }}>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-6">
               <div className="bg-white dark:bg-gray-800 rounded border border-gray-300 dark:border-gray-400 p-4 text-center space-y-2">

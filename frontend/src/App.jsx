@@ -22,7 +22,7 @@ import PassedApplicants from "./pages/applicant/PassedApplicants.jsx";
 import RejectedApplicants from "./pages/applicant/RejectedApplicants.jsx";
 import ManagerSchedule from './pages/schedule/ManagerSchedule.jsx';
 import MemberSchedule from './pages/schedule/MemberSchedule.jsx';
-import { InterviewProgress } from './pages/applicant';
+import InterviewProgress from './pages/applicant/InterviewProgress';
 
 // Context & Constants
 import { ThemeProvider } from "./context/ThemeContext";

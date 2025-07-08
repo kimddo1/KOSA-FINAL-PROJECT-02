@@ -3,6 +3,7 @@ import Layout from '../../layout/Layout';
 import { FaRegStar, FaStar, FaCalendarAlt, FaEnvelope } from 'react-icons/fa';
 import { useParams, useNavigate } from 'react-router-dom';
 import api from '../../api/api';
+import ViewPostSidebar from '../../components/ViewPostSidebar';
 
 export default function RejectedApplicants() {
   const [rejectedApplicants, setRejectedApplicants] = useState([]);
@@ -11,6 +12,8 @@ export default function RejectedApplicants() {
   const [error, setError] = useState(null);
   const { jobPostId } = useParams();
   const navigate = useNavigate();
+  const [jobPost, setJobPost] = useState(null);
+  const [jobPostLoading, setJobPostLoading] = useState(true);
 
   useEffect(() => {
     const fetchApplicants = async () => {
@@ -28,8 +31,21 @@ export default function RejectedApplicants() {
       }
     };
 
+    const fetchJobPost = async () => {
+      setJobPostLoading(true);
+      try {
+        const res = await api.get(`/company/jobposts/${jobPostId}`);
+        setJobPost(res.data);
+      } catch (err) {
+        setJobPost(null);
+      } finally {
+        setJobPostLoading(false);
+      }
+    };
+
     if (jobPostId) {
       fetchApplicants();
+      fetchJobPost();
     }
   }, [jobPostId]);
 
@@ -47,9 +63,10 @@ export default function RejectedApplicants() {
     return age;
   };
 
-  if (loading) {
+  if (loading || jobPostLoading) {
     return (
       <Layout>
+        <ViewPostSidebar jobPost={jobPost} />
         <div className="h-screen flex items-center justify-center">
           <div className="text-xl">로딩 중...</div>
         </div>
@@ -60,6 +77,7 @@ export default function RejectedApplicants() {
   if (error) {
     return (
       <Layout>
+        <ViewPostSidebar jobPost={jobPost} />
         <div className="h-screen flex items-center justify-center">
           <div className="text-xl text-red-500">{error}</div>
         </div>
@@ -69,7 +87,8 @@ export default function RejectedApplicants() {
 
   return (
     <Layout>
-      <div className="h-screen flex flex-col">
+      <ViewPostSidebar jobPost={jobPost} />
+      <div className="h-screen flex flex-col" style={{ marginLeft: 90 }}>
         {/* Title Box */}
         <div className="bg-white dark:bg-gray-800 shadow px-8 py-4 flex items-center justify-between">
           <div className="text-lg font-semibold text-gray-700 dark:text-gray-300">
