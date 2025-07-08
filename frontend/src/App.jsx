@@ -124,6 +124,8 @@ function AppRoutes() {
                 <Route path="/managerschedule" element={<ProtectedRoute><ManagerSchedule /></ProtectedRoute>} />
                 <Route path="/memberschedule" element={<ProtectedRoute><MemberSchedule /></ProtectedRoute>} />
                 <Route path="/applicantlist/:jobPostId" element={<ProtectedRoute><ApplicantList /></ProtectedRoute>} />
+                <Route path="/interview-progress/:jobPostId" element={<ProtectedRoute><InterviewProgress /></ProtectedRoute>} />
+              
               </Routes>
               <Chatbot />
             </div>

@@ -103,8 +103,24 @@ function InterviewProgress() {
     setEvaluation(prev => ({ ...prev, [item]: level }));
   };
 
-  if (loading || jobPostLoading) return <div className="flex h-screen items-center justify-center dark:text-gray-100">로딩 중...</div>;
-  if (error) return <div className="flex h-screen items-center justify-center text-red-500 dark:text-red-400">{error}</div>;
+  if (loading || jobPostLoading) {
+    return (
+      <div className="relative min-h-screen bg-[#f7faff] dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+        <Navbar />
+        <ViewPostSidebar jobPost={null} />
+        <div className="flex h-screen items-center justify-center dark:text-gray-100">로딩 중...</div>
+      </div>
+    );
+  }
+  if (error) {
+    return (
+      <div className="relative min-h-screen bg-[#f7faff] dark:bg-gray-900 text-gray-900 dark:text-gray-100">
+        <Navbar />
+        <ViewPostSidebar jobPost={null} />
+        <div className="flex h-screen items-center justify-center text-red-500 dark:text-red-400">{error}</div>
+      </div>
+    );
+  }
 
   // 레이아웃: Navbar(상단), ViewPostSidebar(좌측), 나머지 flex
   return (
