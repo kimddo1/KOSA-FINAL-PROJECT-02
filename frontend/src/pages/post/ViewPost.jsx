@@ -106,8 +106,8 @@ function ViewPost() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-6">
               <div className="bg-white dark:bg-gray-800 rounded border border-gray-300 dark:border-gray-400 p-4 text-center space-y-2">
-                <h2 className="text-2xl font-semibold text-gray-900 border-b border-gray-300 dark:border-gray-600 pb-2 dark:text-white">{jobPost.companyName}</h2>
-                <p className="text-md text-gray-900 dark:text-gray-300">{jobPost.title}</p>
+                <h2 className="text-2xl font-semibold text-gray-900 border-b border-gray-300 dark:border-gray-600 pb-2 dark:text-white">{jobPost.title}</h2>
+                <p className="text-md text-gray-900 dark:text-gray-300">{jobPost.department}</p>
               </div>
 
               <div className="flex flex-col md:flex-row gap-4">
@@ -123,7 +123,7 @@ function ViewPost() {
 
               <div className="bg-white dark:bg-gray-800 rounded border border-gray-300 dark:border-gray-400 p-4">
                 <h4 className="text-lg font-semibold ml-4 pb-2 dark:text-white">모집분야 및 자격요건</h4>
-                <div className="text-gray-900 dark:text-white border-t border-gray-300 dark:border-gray-600 pt-2 px-4 whitespace-pre-wrap">{jobPost.jobDetails}</div>
+                <div className="text-gray-900 dark:text-white border-t border-gray-300 dark:border-gray-600 pt-2 px-4 whitespace-pre-wrap">{jobPost.job_details}</div>
               </div>
 
               <div className="bg-white dark:bg-gray-800 rounded border border-gray-300 dark:border-gray-400 p-4">
@@ -137,7 +137,7 @@ function ViewPost() {
                 <h4 className="text-lg font-semibold ml-4 pb-2 dark:text-white">모집 인원, 기간 설정</h4>
                 <div className="border-t border-gray-300 dark:border-gray-600 p-4 pt-2">
                   <p><strong>모집 인원:</strong> {jobPost.headcount}명</p>
-                  <p><strong>기간:</strong> {jobPost.startDate} ~ {jobPost.endDate}</p>
+                  <p><strong>기간:</strong> {jobPost.start_date} ~ {jobPost.end_date}</p>
                 </div>
               </div>
 
@@ -162,17 +162,17 @@ function ViewPost() {
                   </div>
                 </div>
               )}
+              </div>
             </div>
-          </div>
-
-          {/* 하단 버튼 */}
-          <div className="flex justify-center mt-10">
-            <button
-              onClick={() => navigate(`/applicantlist/${jobPostId}`)}
-              className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 text-white px-6 py-3 rounded text-lg"
-            >
-              지원자 조회
-            </button>
+              
+            {/* 하단 버튼 */}
+            <div className="flex justify-center mt-10">
+              <button
+                onClick={() => navigate(`/applicantlist/${jobPostId}`)}
+                className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 text-white px-6 py-3 rounded text-lg"
+              >
+                지원자 조회
+              </button>
           </div>
         </div>
       </Layout>

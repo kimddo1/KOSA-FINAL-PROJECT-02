@@ -70,7 +70,7 @@ function CommonViewPost() {
 
             <div className="bg-white dark:bg-gray-800 rounded border border-gray-300 dark:border-gray-400 p-4">
               <h4 className="text-lg font-semibold ml-4 pb-2 dark:text-white">모집분야 및 자격요건</h4>
-              <pre className="whitespace-pre-wrap text-gray-900 dark:text-white border-t border-gray-300 dark:border-gray-600 pt-2 px-4">{jobPost.jobDetails}</pre>
+              <pre className="whitespace-pre-wrap text-gray-900 dark:text-white border-t border-gray-300 dark:border-gray-600 pt-2 px-4">{jobPost.job_details}</pre>
             </div>
 
             <div className="bg-white dark:bg-gray-800 rounded border border-gray-300 dark:border-gray-400 p-4">

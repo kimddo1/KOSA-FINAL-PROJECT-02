@@ -24,6 +24,7 @@ import {
 } from '@chakra-ui/icons';
 import axios from 'axios';
 import { useLocation } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 // 챗봇 전용 axios 인스턴스
 const chatbotApi = axios.create({
@@ -35,9 +36,11 @@ const chatbotApi = axios.create({
 });
 
 const Chatbot = () => {
+  console.log('Chatbot component rendering');
   // 모든 훅을 최상단에 배치 (순서 중요!)
   const location = useLocation();
   const toast = useToast();
+  const { user } = useAuth();
   
   // useState 훅들
   const [isOpen, setIsOpen] = useState(false);
@@ -205,58 +208,35 @@ const Chatbot = () => {
     setIsTyping(true);
 
     try {
-      // 페이지 컨텍스트 수집
       const pageContext = getPageContext();
+      console.log('챗봇 요청:', { message: messageToSend, session_id: sessionId });
       
-      // 에이전트 API 호출 (페이지 컨텍스트 포함)
       const response = await chatbotApi.post('/chat/', {
-        session_id: sessionId,
         message: messageToSend,
+        session_id: sessionId,
         page_context: pageContext
       });
 
-      if (response.data.ai_response) {
-        const botResponse = {
-          id: messages.length + 2,
-          text: response.data.ai_response,
-          sender: 'bot',
-          timestamp: new Date(),
-          pageSuggestions: response.data.page_suggestions || [],
-          domActions: response.data.dom_actions || []
-        };
-        setMessages(prev => [...prev, botResponse]);
-        
-        // 페이지 제안이나 DOM 액션이 있다면 처리
-        if (response.data.page_suggestions) {
-          console.log('페이지 제안:', response.data.page_suggestions);
-        }
-        if (response.data.dom_actions) {
-          console.log('DOM 액션:', response.data.dom_actions);
-          // 여기서 DOM 액션을 실행할 수 있습니다
-        }
-      } else {
-        throw new Error('응답이 없습니다.');
-      }
-    } catch (error) {
-      console.error('챗봇 API 호출 실패:', error);
-      
-      // 에러 메시지 표시
-      const errorMessage = {
+      console.log('챗봇 응답:', response.data);
+
+      const botMessage = {
         id: messages.length + 2,
-        text: "죄송합니다. 일시적인 오류가 발생했습니다. 잠시 후 다시 시도해주세요.",
+        text: response.data.ai_response || response.data.response || '응답을 받지 못했습니다.',
         sender: 'bot',
         timestamp: new Date(),
-        isError: true
+      };
+
+      setMessages(prev => [...prev, botMessage]);
+    } catch (error) {
+      console.error('챗봇 응답 오류:', error);
+      const errorMessage = {
+        id: messages.length + 2,
+        text: '죄송합니다. 일시적인 오류가 발생했습니다. 잠시 후 다시 시도해주세요.',
+        sender: 'bot',
+        timestamp: new Date(),
+        isError: true,
       };
       setMessages(prev => [...prev, errorMessage]);
-      
-      toast({
-        title: "연결 오류",
-        description: "챗봇 서버에 연결할 수 없습니다.",
-        status: "error",
-        duration: 3000,
-        isClosable: true,
-      });
     } finally {
       setIsTyping(false);
     }
@@ -271,7 +251,7 @@ const Chatbot = () => {
 
   // 크기 조절 시작
   const handleResizeStart = (e, direction) => {
-    e.stopPropagation();
+    e.preventDefault();
     setIsResizing(true);
     setResizeDirection(direction);
     setResizeStart({
@@ -288,21 +268,18 @@ const Chatbot = () => {
 
     const deltaX = e.clientX - resizeStart.x;
     const deltaY = e.clientY - resizeStart.y;
-    
     let newWidth = resizeStart.width;
     let newHeight = resizeStart.height;
 
-    // 방향에 따라 크기 조절
     if (resizeDirection.includes('right')) {
       newWidth = Math.max(300, Math.min(800, resizeStart.width + deltaX));
-    }
-    if (resizeDirection.includes('left')) {
+    } else if (resizeDirection.includes('left')) {
       newWidth = Math.max(300, Math.min(800, resizeStart.width - deltaX));
     }
+
     if (resizeDirection.includes('bottom')) {
       newHeight = Math.max(400, Math.min(800, resizeStart.height + deltaY));
-    }
-    if (resizeDirection.includes('top')) {
+    } else if (resizeDirection.includes('top')) {
       newHeight = Math.max(400, Math.min(800, resizeStart.height - deltaY));
     }
 
@@ -316,7 +293,13 @@ const Chatbot = () => {
   };
 
   return (
-    <Box position="fixed" bottom={4} right={4} zIndex={1000}>
+    <Box 
+      position="fixed" 
+      bottom={4} 
+      right={4} 
+      zIndex={9999}
+      style={{ isolation: 'isolate' }}
+    >
       {/* 챗봇 토글 버튼 - 채팅창이 열려있을 때는 숨김 */}
       <ScaleFade in={!isOpen}>
         <Button
@@ -327,6 +310,7 @@ const Chatbot = () => {
           boxShadow="lg"
           _hover={{ transform: 'scale(1.1)' }}
           transition="all 0.3s"
+          aria-label="챗봇 열기"
         >
           <ChatIcon />
         </Button>
@@ -350,6 +334,7 @@ const Chatbot = () => {
             display="flex"
             flexDirection="column"
             userSelect="none"
+            style={{ isolation: 'isolate' }}
           >
             {/* 헤더 */}
             <Box
@@ -375,6 +360,7 @@ const Chatbot = () => {
                   variant="ghost"
                   color="white"
                   _hover={{ bg: 'whiteAlpha.200' }}
+                  aria-label="챗봇 닫기"
                 />
               </Flex>
             </Box>
@@ -496,6 +482,7 @@ const Chatbot = () => {
                   size="sm"
                   _hover={{ transform: 'scale(1.1)' }}
                   transition="all 0.2s"
+                  aria-label="메시지 전송"
                 />
               </HStack>
             </Box>

@@ -18,23 +18,23 @@ const InterviewInfoModal = ({ onSubmit, onClose }) => {
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <label className="block text-gray-700 dark:text-gray-300 mb-1">날짜</label>
-            <input type="date" value={date} onChange={e => setDate(e.target.value)} required className="w-full border border-gray-300 dark:border-gray-600 rounded px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" />
+            <input type="date" value={date} onChange={e => setDate(e.target.value)} required className="w-full border rounded px-3 py-2" />
           </div>
           <div>
             <label className="block text-gray-700 dark:text-gray-300 mb-1">시간</label>
-            <input type="time" value={time} onChange={e => setTime(e.target.value)} required className="w-full border border-gray-300 dark:border-gray-600 rounded px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" />
+            <input type="time" value={time} onChange={e => setTime(e.target.value)} required className="w-full border rounded px-3 py-2" />
           </div>
           <div>
             <label className="block text-gray-700 dark:text-gray-300 mb-1">장소</label>
-            <input type="text" value={location} onChange={e => setLocation(e.target.value)} required className="w-full border border-gray-300 dark:border-gray-600 rounded px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" />
+            <input type="text" value={location} onChange={e => setLocation(e.target.value)} required className="w-full border rounded px-3 py-2" />
           </div>
           <div>
             <label className="block text-gray-700 dark:text-gray-300 mb-1">메모</label>
-            <textarea value={memo} onChange={e => setMemo(e.target.value)} className="w-full border border-gray-300 dark:border-gray-600 rounded px-3 py-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100" />
+            <textarea value={memo} onChange={e => setMemo(e.target.value)} className="w-full border rounded px-3 py-2" />
           </div>
           <div className="flex justify-end gap-2 mt-6">
-            <button type="button" onClick={onClose} className="px-4 py-2 bg-gray-300 dark:bg-gray-600 text-gray-700 dark:text-gray-200 rounded hover:bg-gray-400 dark:hover:bg-gray-500">취소</button>
-            <button type="submit" className="px-4 py-2 bg-blue-500 dark:bg-blue-600 text-white rounded hover:bg-blue-600 dark:hover:bg-blue-700">확인</button>
+            <button type="button" onClick={onClose} className="px-4 py-2 bg-gray-300 text-gray-700 rounded hover:bg-gray-400">취소</button>
+            <button type="submit" className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600">확인</button>
           </div>
         </form>
       </div>

@@ -35,13 +35,13 @@ function PostRecruitment() {
     department: '',
     qualifications: '',
     conditions: '',
-    jobDetails: '',
+    job_details: '',
     procedures: '',
     headcount: '',
-    startDate: null,
-    endDate: null,
+    start_date: null,
+    end_date: null,
     location: '',
-    employmentType: '',
+    employment_type: '',
     deadline: null,
     company: null
   });
@@ -61,7 +61,7 @@ function PostRecruitment() {
 
   const qualificationsRef = useAutoResize(formData.qualifications);
   const conditionsRef = useAutoResize(formData.conditions);
-  const jobDetailsRef = useAutoResize(formData.jobDetails);
+  const jobDetailsRef = useAutoResize(formData.job_details);
   const proceduresRef = useAutoResize(formData.procedures);
 
   const handleTextareaChange = (e, field) => {
@@ -111,7 +111,7 @@ function PostRecruitment() {
   const isFieldEmpty = (value) => value === null || value === undefined || value === '';
   const isTeamValid = teamMembers.length > 0 && teamMembers.every(m => m.email && m.role);
   const isScheduleValid = schedules.length > 0 && schedules.every(s => s.date && s.time && s.place);
-  const isRecruitInfoValid = [formData.title, formData.department, formData.qualifications, formData.conditions, formData.jobDetails, formData.procedures, formData.headcount, formData.startDate, formData.endDate, formData.location, formData.employmentType].every(v => !isFieldEmpty(v));
+  const isRecruitInfoValid = [formData.title, formData.department, formData.qualifications, formData.conditions, formData.job_details, formData.procedures, formData.headcount, formData.start_date, formData.end_date, formData.location, formData.employment_type].every(v => !isFieldEmpty(v));
   const isReady = isRecruitInfoValid && isTeamValid && isScheduleValid;
   const [showError, setShowError] = useState(false);
 
@@ -128,8 +128,8 @@ function PostRecruitment() {
         ...formData,
         // company_id는 백엔드에서 자동 설정됨
         headcount: formData.headcount ? parseInt(formData.headcount) : null,
-        startDate: formData.startDate ? formData.startDate.toISOString() : null,
-        endDate: formData.endDate ? formData.endDate.toISOString() : null,
+        start_date: formData.start_date ? formData.start_date.toISOString() : null,
+        end_date: formData.end_date ? formData.end_date.toISOString() : null,
         deadline: formData.deadline ? formData.deadline.toISOString().split('T')[0] : null,
         teamMembers: teamMembers.filter(member => member.email && member.role),  // 빈 항목 제거
         weights: weights.filter(weight => weight.item && weight.score),  // 빈 항목 제거
@@ -174,14 +174,11 @@ function PostRecruitment() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div className="lg:col-span-2 space-y-6">
               <div className="bg-white dark:bg-gray-800 rounded border border-gray-300 dark:border-gray-400 p-4 text-center space-y-2">
-                <div className="text-2xl font-semibold w-full text-center bg-transparent outline-none text-gray-900 dark:text-white border-b border-gray-300 dark:border-gray-600 pb-2">
-                  {formData.company?.name}
-                </div>
                 <input 
                   type="text" 
                   value={formData.title} 
                   onChange={(e) => handleInputChange(e, 'title')} 
-                  className={`text-md w-full text-center bg-transparent outline-none text-gray-900 dark:text-gray-300 ${showError && !formData.title ? 'border-b-2 border-red-500' : ''}`} 
+                  className={`text-2xl font-semibold w-full text-center bg-transparent outline-none text-gray-900 dark:text-white border-b border-gray-300 dark:border-gray-600 pb-2 ${showError && !formData.title ? 'border-b-2 border-red-500' : ''}`} 
                   placeholder="채용공고 제목" 
                 />
                 {showError && !formData.title && <div className="text-red-500 text-xs text-left">채용공고 제목을 입력하세요.</div>}
@@ -189,7 +186,7 @@ function PostRecruitment() {
                   type="text" 
                   value={formData.department} 
                   onChange={(e) => handleInputChange(e, 'department')} 
-                  className={`text-sm w-full text-center bg-transparent outline-none text-gray-600 dark:text-gray-400 ${showError && !formData.department ? 'border-b-2 border-red-500' : ''}`} 
+                  className={`text-md w-full text-center bg-transparent outline-none text-gray-900 dark:text-gray-300 ${showError && !formData.department ? 'border-b-2 border-red-500' : ''}`} 
                   placeholder="부서명 (예: 개발팀, 인사팀)" 
                 />
                 {showError && !formData.department && <div className="text-red-500 text-xs text-left">부서명을 입력하세요.</div>}
@@ -224,12 +221,12 @@ function PostRecruitment() {
                 <h4 className="text-lg font-semibold ml-4 pb-2 dark:text-white">모집분야 및 자격요건</h4>
                 <textarea 
                   ref={jobDetailsRef}
-                  value={formData.jobDetails} 
-                  onChange={(e) => handleTextareaChange(e, 'jobDetails')} 
-                  className={`w-full min-h-[100px] overflow-hidden resize-none p-4 rounded outline-none border-t border-gray-300 dark:border-gray-600 pt-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white ${showError && !formData.jobDetails ? 'border-2 border-red-500' : ''}`} 
+                          value={formData.job_details}
+        onChange={(e) => handleTextareaChange(e, 'job_details')} 
+                  className={`w-full min-h-[100px] overflow-hidden resize-none p-4 rounded outline-none border-t border-gray-300 dark:border-gray-600 pt-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white ${showError && !formData.job_details ? 'border-2 border-red-500' : ''}`} 
                   placeholder="담당업무, 자격요건, 우대사항 등" 
                 />
-                {showError && !formData.jobDetails && <div className="text-red-500 text-xs text-left">모집분야 및 자격요건을 입력하세요.</div>}
+                {showError && !formData.job_details && <div className="text-red-500 text-xs text-left">모집분야 및 자격요건을 입력하세요.</div>}
               </div>
 
               <div className="bg-white dark:bg-gray-800 rounded border border-gray-300 dark:border-gray-400 p-4">
@@ -273,9 +270,9 @@ function PostRecruitment() {
                   <div className="flex items-center gap-2">
                     <label className="w-24 text-sm text-gray-700 dark:text-white">고용형태:</label>
                     <select 
-                      value={formData.employmentType} 
-                      onChange={(e) => handleInputChange(e, 'employmentType')} 
-                      className={`border px-2 py-1 rounded w-full bg-white dark:bg-gray-800 text-gray-900 dark:text-white transition-colors ${showError && !formData.employmentType ? 'border-red-500' : 'border-gray-400 dark:border-gray-600'}`}
+                              value={formData.employment_type}
+        onChange={(e) => handleInputChange(e, 'employment_type')} 
+                      className={`border px-2 py-1 rounded w-full bg-white dark:bg-gray-800 text-gray-900 dark:text-white transition-colors ${showError && !formData.employment_type ? 'border-red-500' : 'border-gray-400 dark:border-gray-600'}`}
                     >
                       <option value="">선택하세요</option>
                       {employmentTypeOptions.map(type => (
@@ -283,40 +280,40 @@ function PostRecruitment() {
                       ))}
                     </select>
                   </div>
-                  {showError && !formData.employmentType && <div className="text-red-500 text-xs text-left">고용형태를 선택하세요.</div>}
+                  {showError && !formData.employment_type && <div className="text-red-500 text-xs text-left">고용형태를 선택하세요.</div>}
                   <div className="flex flex-col gap-2 overflow-x-hidden">
                     <label className="text-sm text-gray-700 dark:text-white">모집기간:</label>
                     <div className="flex flex-col md:flex-row items-center gap-1 w-full">
                       <DatePicker 
-                        selected={formData.startDate} 
-                        onChange={(date) => handleInputChange({ target: { value: date } }, 'startDate')} 
+                                selected={formData.start_date}
+        onChange={(date) => handleInputChange({ target: { value: date } }, 'start_date')} 
                         selectsStart 
-                        startDate={formData.startDate} 
-                        endDate={formData.endDate} 
+                        startDate={formData.start_date} 
+                        endDate={formData.end_date} 
                         dateFormat="yyyy/MM/dd HH:mm" 
                         showTimeSelect
-                        className={`w-full md:w-36 min-w-0 border px-2 py-1 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm transition-colors ${showError && !formData.startDate ? 'border-red-500' : 'border-gray-400 dark:border-gray-600'}`}
+                        className={`w-full md:w-36 min-w-0 border px-2 py-1 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm transition-colors ${showError && !formData.start_date ? 'border-red-500' : 'border-gray-400 dark:border-gray-600'}`}
                         placeholderText="시작일시" 
                         calendarClassName="bg-white text-gray-900 dark:bg-gray-800 dark:text-white" 
                         popperClassName="dark:bg-gray-800 dark:text-white border-0 shadow-lg" 
                       />
                       <span className="text-sm text-gray-700 dark:text-gray-300 px-1">~</span>
                       <DatePicker 
-                        selected={formData.endDate} 
-                        onChange={(date) => handleInputChange({ target: { value: date } }, 'endDate')} 
+                        selected={formData.end_date} 
+                        onChange={(date) => handleInputChange({ target: { value: date } }, 'end_date')} 
                         selectsEnd 
-                        startDate={formData.startDate} 
-                        endDate={formData.endDate} 
-                        minDate={formData.startDate} 
+                        startDate={formData.start_date} 
+                        endDate={formData.end_date} 
+                        minDate={formData.start_date} 
                         dateFormat="yyyy/MM/dd HH:mm" 
                         showTimeSelect
-                        className={`w-full md:w-36 min-w-0 border px-2 py-1 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm transition-colors ${showError && !formData.endDate ? 'border-red-500' : 'border-gray-400 dark:border-gray-600'}`}
+                        className={`w-full md:w-36 min-w-0 border px-2 py-1 rounded bg-white dark:bg-gray-800 text-gray-900 dark:text-white text-sm transition-colors ${showError && !formData.end_date ? 'border-red-500' : 'border-gray-400 dark:border-gray-600'}`}
                         placeholderText="종료일시" 
                         calendarClassName="bg-white text-gray-900 dark:bg-gray-800 dark:text-white" 
                         popperClassName="dark:bg-gray-800 dark:text-white border-0 shadow-lg" 
                       />
                     </div>
-                    {showError && (!formData.startDate || !formData.endDate) && (
+                    {showError && (!formData.start_date || !formData.end_date) && (
                       <div className="text-red-500 text-xs text-left mt-1">시작일시와 종료일시를 모두 입력하세요.</div>
                     )}
                   </div>

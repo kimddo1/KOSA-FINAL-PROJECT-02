@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import Layout from '../../layout/Layout';
 import { FaRegStar, FaStar } from 'react-icons/fa';
 import { IoArrowBack } from 'react-icons/io5';
+import { FcComboChart } from 'react-icons/fc';
 import { useAuth } from '../../context/AuthContext';
 import { ROLES } from '../../constants/roles';
 import SettingsMenu, { getDefaultSettingsButton } from '../../components/SettingsMenu';
@@ -10,6 +11,13 @@ import ResumeCard from '../../components/ResumeCard';
 import { useNavigate, useParams, Link } from 'react-router-dom';
 import api from '../../api/api';
 import ViewPostSidebar from '../../components/ViewPostSidebar';
+import Button from '@mui/material/Button';
+import Modal from '@mui/material/Modal';
+import Box from '@mui/material/Box';
+import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid, PieChart, Pie, Cell } from 'recharts';
+import IconButton from '@mui/material/IconButton';
+import ArrowBackIosNew from '@mui/icons-material/ArrowBackIosNew';
+import ArrowForwardIos from '@mui/icons-material/ArrowForwardIos';
 
 export default function ApplicantList() {
   const [bookmarkedList, setBookmarkedList] = useState([]);
@@ -32,6 +40,8 @@ export default function ApplicantList() {
   const [jobPost, setJobPost] = useState(null);
   const [jobPostLoading, setJobPostLoading] = useState(true);
   const [expanded, setExpanded] = useState(null);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [slideIndex, setSlideIndex] = useState(0);
   
   // jobPostId가 없으면 기본값 사용
   const effectiveJobPostId = jobPostId;
@@ -67,20 +77,23 @@ export default function ApplicantList() {
     if (effectiveJobPostId) fetchData();
   }, [effectiveJobPostId]);
 
+
+  // applicants 데이터 샘플 콘솔 출력
   useEffect(() => {
-    const fetchJobPost = async () => {
-      setJobPostLoading(true);
-      try {
-        const res = await api.get(`/company/jobposts/${jobPostId}`);
-        setJobPost(res.data);
-      } catch (err) {
-        setJobPost(null);
-      } finally {
-        setJobPostLoading(false);
-      }
-    };
-    if (jobPostId) fetchJobPost();
-  }, [jobPostId]);
+    if (applicants.length > 0) {
+      console.log("applicants 샘플:", applicants.slice(0, 3));
+      applicants.slice(0, 3).forEach(app => {
+        console.log("birthDate:", app.birthDate, "typeof:", typeof app.birthDate);
+      });
+    }
+  }, [applicants]);
+
+  useEffect(() => {
+    if (applicants.length > 0) {
+      console.log("applicants gender 샘플:", applicants.map(a => a.gender));
+      console.log("getGenderStats:", getGenderStats(applicants));
+    }
+  }, [applicants]);
 
   const handleDelete = async () => {
     if (window.confirm('이 지원자를 삭제하시겠습니까?')) {
@@ -190,7 +203,88 @@ export default function ApplicantList() {
     return age;
   };
 
-  if (loading || jobPostLoading) {
+  // 나이대별 지원자 수 집계 함수 (범주 고정, 모든 범주 항상 표시)
+  const getAgeGroupStats = (applicants) => {
+    const now = new Date();
+    const getAge = (birth) => {
+      if (!birth) return null;
+      const birthDate = new Date(birth);
+      if (isNaN(birthDate.getTime())) {
+        console.log("Invalid birthDate:", birth);
+        return null;
+      }
+      let age = now.getFullYear() - birthDate.getFullYear();
+      const m = now.getMonth() - birthDate.getMonth();
+      if (m < 0 || (m === 0 && now.getDate() < birthDate.getDate())) age--;
+      return age;
+    };
+    const AGE_GROUPS = [
+      { label: '20대초반', min: 20, max: 23 },
+      { label: '20대중반', min: 24, max: 26 },
+      { label: '20대후반', min: 27, max: 29 },
+      { label: '30대초반', min: 30, max: 33 },
+      { label: '30대중반', min: 34, max: 36 },
+      { label: '30대후반', min: 37, max: 39 },
+      { label: '40대', min: 40, max: 49 },
+      { label: '50대이상', min: 50, max: 150 },
+    ];
+    // 모든 범주를 0으로 초기화
+    const stats = AGE_GROUPS.map(g => ({ name: g.label, count: 0 }));
+    applicants.forEach(app => {
+      const birth = app.birthDate || app.birthdate || app.birthday;
+      const age = getAge(birth);
+      if (age === null) return;
+      for (let i = 0; i < AGE_GROUPS.length; i++) {
+        const g = AGE_GROUPS[i];
+        if (age >= g.min && age <= g.max) {
+          stats[i].count++;
+          break;
+        }
+      }
+    });
+    return stats;
+  };
+
+  // 성별 통계 집계 함수
+  const getGenderStats = (applicants) => {
+    const male = applicants.filter(a => a.gender === 'M').length;
+    const female = applicants.filter(a => a.gender === 'F').length;
+    return [
+      { name: '남성', value: male },
+      { name: '여성', value: female }
+    ];
+  };
+
+  const GENDER_COLORS = ['#42a5f5', '#f06292'];
+
+  // 학력 통계 집계 함수
+  const getEducationStats = (applicants) => {
+    let high = 0, college = 0, master = 0;
+    applicants.forEach(a => {
+      let level = null;
+      if (a.educations && a.educations.length > 0) {
+        const degrees = a.educations.map(e => (e.degree || '').toLowerCase());
+        if (degrees.some(d => d.includes('석사') || d.includes('박사') || d.includes('phd') || d.includes('master'))) {
+          level = '석사이상';
+        } else if (degrees.some(d => d.includes('학사') || d.includes('대졸') || d.includes('bachelor'))) {
+          level = '대졸';
+        } else if (degrees.some(d => d.includes('고등학교') || d.includes('고졸') || d.includes('high'))) {
+          level = '고졸';
+        }
+      }
+      if (level === '석사이상') master++;
+      else if (level === '대졸') college++;
+      else if (level === '고졸') high++;
+    });
+    return [
+      { name: '고졸', value: high },
+      { name: '대졸', value: college },
+      { name: '석사이상', value: master }
+    ];
+  };
+  const EDU_COLORS = ['#ffd54f', '#4fc3f7', '#ab47bc'];
+
+  if (loading) {
     return (
       <Layout settingsButton={settingsButton}>
         <ViewPostSidebar jobPost={jobPost} />
@@ -282,6 +376,16 @@ export default function ApplicantList() {
                       <div className="text-5xl font-bold text-gray-800 dark:text-white">{waitingApplicants.length}</div>
                       <div className="text-2xl font-semibold text-gray-600 dark:text-gray-300">미열람 지원자</div>
                       <div className="text-5xl font-bold text-gray-800 dark:text-white">{waitingApplicants.filter(a => !a.isViewed).length}</div>
+                      <div className="flex justify-center w-full">
+                        <Button
+                          variant="outlined"
+                          startIcon={<FcComboChart style={{ fontSize: 28 }} />}
+                          onClick={() => setModalOpen(true)}
+                          sx={{ mt: 3, px: 4, py: 1.5, fontWeight: 'bold', fontSize: '1rem', borderRadius: 2, borderColor: '#42a5f5', color: '#424242', background: '#fff', '&:hover': { background: '#e3f2fd', borderColor: '#42a5f5' } }}
+                        >
+                          통계 시각화
+                        </Button>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -307,6 +411,93 @@ export default function ApplicantList() {
           </div>
         </div>
       </div>
+      <Modal
+        open={modalOpen}
+        onClose={() => setModalOpen(false)}
+        aria-labelledby="stat-modal-title"
+        aria-describedby="stat-modal-desc"
+      >
+        <Box
+          sx={{
+            position: 'absolute',
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            width: 800,
+            bgcolor: 'background.paper',
+            border: '2px solid #1976d2',
+            boxShadow: 24,
+            borderRadius: 3,
+            p: 4,
+          }}
+        >
+          <div className="flex items-center justify-between mb-4">
+            <IconButton onClick={() => setSlideIndex(slideIndex - 1)} disabled={slideIndex === 0}>
+              <ArrowBackIosNew />
+            </IconButton>
+            <h2 id="stat-modal-title" className="text-xl font-bold">
+              {slideIndex === 0 ? '나이대별 지원자 수' : slideIndex === 1 ? '성별 지원자 비율' : '학력분포도'}
+            </h2>
+            <IconButton onClick={() => setSlideIndex(slideIndex + 1)} disabled={slideIndex === 2}>
+              <ArrowForwardIos />
+            </IconButton>
+          </div>
+          {slideIndex === 0 && (
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={getAgeGroupStats(applicants)} margin={{ top: 20, right: 30, left: 0, bottom: 5 }}>
+                <CartesianGrid strokeDasharray="3 3" />
+                <XAxis dataKey="name" />
+                <YAxis allowDecimals={false} />
+                <Tooltip />
+                <Bar dataKey="count" fill="#42a5f5" radius={[6, 6, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          )}
+          {slideIndex === 1 && (
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={getGenderStats(applicants)}
+                  dataKey="value"
+                  nameKey="name"
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={100}
+                  label
+                >
+                  {getGenderStats(applicants).map((entry, idx) => (
+                    <Cell key={`cell-${idx}`} fill={GENDER_COLORS[idx % GENDER_COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip />
+              </PieChart>
+            </ResponsiveContainer>
+          )}
+          {slideIndex === 2 && (
+            <ResponsiveContainer width="100%" height={300}>
+              <PieChart>
+                <Pie
+                  data={getEducationStats(applicants)}
+                  dataKey="value"
+                  nameKey="name"
+                  cx="50%"
+                  cy="50%"
+                  outerRadius={100}
+                  label
+                >
+                  {getEducationStats(applicants).map((entry, idx) => (
+                    <Cell key={`cell-edu-${idx}`} fill={EDU_COLORS[idx % EDU_COLORS.length]} />
+                  ))}
+                </Pie>
+                <Tooltip />
+              </PieChart>
+            </ResponsiveContainer>
+          )}
+          <div className="flex justify-center mt-4">
+            <Button onClick={() => setModalOpen(false)} variant="contained">닫기</Button>
+          </div>
+        </Box>
+      </Modal>
     </Layout>
   );
 }

@@ -18,13 +18,13 @@ class JobPost(BaseModel):
     department: Optional[str] = None
     qualifications: Optional[str] = None
     conditions: Optional[str] = None
-    jobDetails: Optional[str] = None
+    job_details: Optional[str] = None
     procedures: Optional[str] = None
     headcount: Optional[int] = None
-    startDate: Optional[str] = None
-    endDate: Optional[str] = None
+    start_date: Optional[str] = None
+    end_date: Optional[str] = None
     location: Optional[str] = None
-    employmentType: Optional[str] = None
+    employment_type: Optional[str] = None
     deadline: Optional[str] = None
     status: Optional[str] = "ACTIVE"
 
@@ -59,8 +59,8 @@ class JobPostList(BaseModel):
     title: str
     procedures: Optional[str] = None
     headcount: Optional[int] = None
-    startDate: Optional[str] = None
-    endDate: Optional[str] = None
+    start_date: Optional[str] = None
+    end_date: Optional[str] = None
     companyName: Optional[str] = None
     status: Optional[str] = None
     created_at: Optional[datetime] = None

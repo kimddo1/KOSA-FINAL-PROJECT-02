@@ -106,7 +106,6 @@ services:
       - .env
     environment:
       - REDIS_URL=redis://redis:6379
-      - OPENAI_API_KEY=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
     depends_on:
       - redis
     volumes:

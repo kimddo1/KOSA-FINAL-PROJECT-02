@@ -36,7 +36,7 @@ function EditPost() {
   const [subtitle, setSubtitle] = useState('');
   const [qualifications, setQualifications] = useState('');
   const [conditions, setConditions] = useState('');
-  const [jobDetails, setJobDetails] = useState('');
+  const [job_details, setJobDetails] = useState('');
   const [procedures, setProcedures] = useState('');
   const [headcount, setHeadcount] = useState('');
   const [period, setPeriod] = useState({
@@ -58,12 +58,12 @@ function EditPost() {
         setSubtitle(jobPost.title);
         setQualifications(jobPost.qualifications);
         setConditions(jobPost.conditions);
-        setJobDetails(jobPost.jobDetails);
+        setJobDetails(jobPost.job_details);
         setProcedures(jobPost.procedures);
         setHeadcount(jobPost.headcount);
         setPeriod({
-          start: new Date(jobPost.startDate),
-          end: new Date(jobPost.endDate)
+                  start: new Date(jobPost.start_date),
+        end: new Date(jobPost.end_date)
         });
         setTeamMembers(jobPost.teamMembers || []);
         setWeights(jobPost.weights || []);
@@ -114,11 +114,11 @@ function EditPost() {
         title: subtitle,
         qualifications,
         conditions,
-        jobDetails,
+        job_details,
         procedures,
         headcount,
-        startDate: period.start.toISOString().split('T')[0],
-        endDate: period.end.toISOString().split('T')[0],
+        start_date: period.start.toISOString().split('T')[0],
+        end_date: period.end.toISOString().split('T')[0],
         teamMembers,
         weights
       });
@@ -188,7 +188,7 @@ function EditPost() {
                 <h4 className="text-lg font-semibold ml-4 pb-2 dark:text-white">모집분야 및 자격요건</h4>
                 <textarea 
                   ref={jobDetailsRef}
-                  value={jobDetails} 
+                  value={job_details} 
                   onChange={(e) => handleTextareaChange(e, setJobDetails)} 
                   className="w-full min-h-[100px] overflow-hidden resize-none p-4 rounded outline-none border-t border-gray-300 dark:border-gray-600 pt-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white" 
                   placeholder="담당업무, 자격요건, 우대사항 등" 

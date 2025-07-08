@@ -1,5 +1,7 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { ThemeProvider as MuiThemeProvider, createTheme } from '@mui/material/styles';
+import { CssBaseline } from '@mui/material';
 
 // Pages
 import Home from "./pages/home/Home.jsx";
@@ -71,6 +73,19 @@ class ErrorBoundary extends React.Component {
   }
 }
 
+// Material-UI v5 테마 생성
+const muiTheme = createTheme({
+  palette: {
+    mode: 'light',
+    primary: {
+      main: '#1976d2',
+    },
+    secondary: {
+      main: '#dc004e',
+    },
+  },
+});
+
 // App Routes Component
 function AppRoutes() {
   const { user } = useAuth();
@@ -78,41 +93,43 @@ function AppRoutes() {
   return (
     <BrowserRouter>
       <ScrollToTop />
-      <ChakraProvider>
-        <ThemeProvider>
-          <div className="min-h-screen bg-[#eef6ff] dark:bg-black">
-            <Routes>
-              {/* Public Routes */}
-              <Route path="/" element={<Home />} />
-              <Route path="/login" element={<Login />} />
-              <Route path="/signup" element={<Signup />} />
-              <Route path="/joblist" element={<JobList />} />
-              <Route path="/common/company" element={<PartnerList />} />
-              <Route path="/common/company/:id" element={<PartnerDetail />} />
-              <Route path="/common/jobposts/:id" element={<CommonViewPost />} />
-              <Route path="/role-test" element={<RoleTest />} />
-              <Route path="/test-connection" element={<TestConnection />} />
+      <MuiThemeProvider theme={muiTheme}>
+        <CssBaseline />
+        <ChakraProvider>
+          <ThemeProvider>
+            <div className="min-h-screen bg-[#eef6ff] dark:bg-black">
+              <Routes>
+                {/* Public Routes */}
+                <Route path="/" element={<Home />} />
+                <Route path="/login" element={<Login />} />
+                <Route path="/signup" element={<Signup />} />
+                <Route path="/joblist" element={<JobList />} />
+                <Route path="/common/company" element={<PartnerList />} />
+                <Route path="/common/company/:id" element={<PartnerDetail />} />
+                <Route path="/common/jobposts/:id" element={<CommonViewPost />} />
+                <Route path="/role-test" element={<RoleTest />} />
+                <Route path="/test-connection" element={<TestConnection />} />
 
-              {/* Protected Routes */}
-              <Route path="/mypage" element={<ProtectedRoute><MyPage /></ProtectedRoute>} />
-              <Route path="/corporatehome" element={<ProtectedRoute><CorporateHome /></ProtectedRoute>} />
-              <Route path="/applicantlist" element={<ProtectedRoute><ApplicantList /></ProtectedRoute>} />
-              <Route path="/email" element={<ProtectedRoute><Email /></ProtectedRoute>} />
-              <Route path="/postrecruitment" element={<ProtectedRoute><PostRecruitment /></ProtectedRoute>} />
-              <Route path="/company/jobposts/:id" element={<ProtectedRoute><CommonViewPost /></ProtectedRoute>} />
-              <Route path="/viewpost/:jobPostId" element={<ProtectedRoute><ViewPost /></ProtectedRoute>} />
-              <Route path="/passedapplicants/:jobPostId" element={<ProtectedRoute><PassedApplicants /></ProtectedRoute>} />
-              <Route path="/editpost/:jobPostId" element={<ProtectedRoute><EditPost /></ProtectedRoute>} />
-              <Route path="/rejectedapplicants/:jobPostId" element={<ProtectedRoute><RejectedApplicants /></ProtectedRoute>} />
-              <Route path="/managerschedule" element={<ProtectedRoute><ManagerSchedule /></ProtectedRoute>} />
-              <Route path="/memberschedule" element={<ProtectedRoute><MemberSchedule /></ProtectedRoute>} />
-              <Route path="/applicantlist/:jobPostId" element={<ProtectedRoute><ApplicantList /></ProtectedRoute>} />
-              <Route path="/interview-progress/:jobPostId" element={<ProtectedRoute><InterviewProgress /></ProtectedRoute>} />
-            </Routes>
-            {user && user.role !== 'guest' && <Chatbot />}
-          </div>
-        </ThemeProvider>
-      </ChakraProvider>
+                {/* Protected Routes */}
+                <Route path="/mypage" element={<ProtectedRoute><MyPage /></ProtectedRoute>} />
+                <Route path="/corporatehome" element={<ProtectedRoute><CorporateHome /></ProtectedRoute>} />
+                <Route path="/applicantlist" element={<ProtectedRoute><ApplicantList /></ProtectedRoute>} />
+                <Route path="/email" element={<ProtectedRoute><Email /></ProtectedRoute>} />
+                <Route path="/postrecruitment" element={<ProtectedRoute><PostRecruitment /></ProtectedRoute>} />
+                <Route path="/company/jobposts/:id" element={<ProtectedRoute><CommonViewPost /></ProtectedRoute>} />
+                <Route path="/viewpost/:jobPostId" element={<ProtectedRoute><ViewPost /></ProtectedRoute>} />
+                <Route path="/passedapplicants/:jobPostId" element={<ProtectedRoute><PassedApplicants /></ProtectedRoute>} />
+                <Route path="/editpost/:jobPostId" element={<ProtectedRoute><EditPost /></ProtectedRoute>} />
+                <Route path="/rejectedapplicants/:jobPostId" element={<ProtectedRoute><RejectedApplicants /></ProtectedRoute>} />
+                <Route path="/managerschedule" element={<ProtectedRoute><ManagerSchedule /></ProtectedRoute>} />
+                <Route path="/memberschedule" element={<ProtectedRoute><MemberSchedule /></ProtectedRoute>} />
+                <Route path="/applicantlist/:jobPostId" element={<ProtectedRoute><ApplicantList /></ProtectedRoute>} />
+              </Routes>
+              <Chatbot />
+            </div>
+          </ThemeProvider>
+        </ChakraProvider>
+      </MuiThemeProvider>
     </BrowserRouter>
   );
 }

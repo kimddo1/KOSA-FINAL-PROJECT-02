@@ -89,6 +89,8 @@ class ApplicantList(BaseModel):
     status: ApplyStatus
     applied_at: datetime
     score: Optional[float] = None
+    birthDate: Optional[str] = None
+    gender: Optional[str] = None
     
     class Config:
         alias_generator = to_camel

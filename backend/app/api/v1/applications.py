@@ -11,6 +11,7 @@ from app.models.user import User
 from app.api.v1.auth import get_current_user
 from app.models.resume import Resume
 from app.models.user import User
+from app.models.applicant_user import ApplicantUser
 
 router = APIRouter()
 
@@ -197,7 +198,7 @@ def get_application(
         # 이력서 정보 추가
         "applicantName": user.name if user else "",
         "gender": user.gender if user else "",
-        "birthDate": user.birth_date if user else "",
+        "birthDate": str(user.birth_date) if user.birth_date else None,
         "email": user.email if user else "",
         "address": user.address if user else "",
         "phone": user.phone if user else "",
@@ -264,27 +265,26 @@ def update_application_status(
 def get_applicants_by_job(
     job_post_id: int,
     db: Session = Depends(get_db)
-    # current_user: User = Depends(get_current_user)  # 임시로 주석처리
 ):
-    print(f"API 호출: job_post_id = {job_post_id}")
     applications = db.query(Application).filter(Application.job_post_id == job_post_id).all()
-    print(f"데이터베이스에서 찾은 지원서 수: {len(applications)}")
-    
     applicants = []
     for app in applications:
+        is_applicant = db.query(ApplicantUser).filter(ApplicantUser.id == app.user_id).first()
+        if not is_applicant:
+            continue
         user = db.query(User).filter(User.id == app.user_id).first()
-        if user:
-            applicant_data = {
-                "id": user.id,
-                "name": user.name,
-                "email": user.email,
-                "application_id": app.id, 
-                "status": app.status,
-                "applied_at": app.applied_at,
-                "score": app.score
-            }
-            applicants.append(applicant_data)
-            # print(f"지원자 추가: {user.name} (ID: {user.id})")
-    
-    print(f"최종 반환할 지원자 수: {len(applicants)}")
+        if not user:
+            continue
+        applicant_data = {
+            "id": user.id,
+            "name": user.name,
+            "email": user.email,
+            "application_id": app.id,
+            "status": app.status,
+            "applied_at": app.applied_at,
+            "score": app.score,
+            "birthDate": user.birth_date.isoformat() if user.birth_date else None,
+            "gender": user.gender if user.gender else None
+        }
+        applicants.append(applicant_data)
     return applicants
