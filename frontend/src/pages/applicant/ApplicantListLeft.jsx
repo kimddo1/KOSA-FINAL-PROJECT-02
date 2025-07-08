@@ -12,6 +12,7 @@ function ApplicantListLeft({
   toggleBookmark,
   calculateAge,
   onFilteredApplicantsChange,
+  compact = false,
 }) {
   const [activeTab, setActiveTab] = useState('ALL');
   const [searchQuery, setSearchQuery] = useState('');
@@ -112,22 +113,22 @@ function ApplicantListLeft({
   };
 
   return (
-    <div className="flex flex-col w-full h-full p-4 overflow-y-auto">
+    <div className="flex flex-col w-full h-full p-2 overflow-y-auto">
       {/* 상단 필터/정렬 */}
       <div className="w-full max-w-3xl mx-auto">
-        <div className="flex items-center gap-4 mb-6 relative">
+        <div className="flex items-center gap-4 mb-4 relative">
           {/* 검색창 */}
           <input
             type="text"
             placeholder="이름 검색"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 px-3 py-1.5 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all mr-2"
-            style={{ minWidth: 140 }}
+            className="border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 px-2 py-1 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all mr-2 text-xs"
+            style={{ minWidth: 100 }}
           />
           <div className="flex-1" />
           {/* 탭 필터 */}
-          <div className="flex gap-2">
+          <div className="flex gap-1">
             <button onClick={() => setActiveTab('ALL')} className={getButtonStyle('ALL')}>전체</button>
             <button onClick={() => setActiveTab('SUITABLE')} className={getButtonStyle('SUITABLE')}>적합</button>
             <button onClick={() => setActiveTab('UNSUITABLE')} className={getButtonStyle('UNSUITABLE')}>부적합</button>
@@ -183,7 +184,7 @@ function ApplicantListLeft({
           </div>
         </div>
         {/* 리스트 */}
-        <div className="flex flex-col gap-4">
+        <div className="flex flex-col gap-2">
           {filteredApplicants.length > 0 ? (
             filteredApplicants.map((applicant, index) => {
               const globalIndex = applicants.findIndex((a) => a.id === applicant.id);
@@ -208,11 +209,12 @@ function ApplicantListLeft({
                   }}
                   onBookmarkToggle={() => toggleBookmark(globalIndex)}
                   calculateAge={calculateAge}
+                  compact={compact}
                 />
               );
             })
           ) : (
-            <div className="text-center text-gray-500 py-10">지원자가 없습니다.</div>
+            <div className="text-center text-gray-500 py-6 text-xs">지원자가 없습니다.</div>
           )}
         </div>
       </div>
