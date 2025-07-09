@@ -1,11 +1,13 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from typing import List
+from typing import List, Optional
 from datetime import datetime
 from app.core.database import get_db
 from app.models.schedule import Schedule, ScheduleInterview
 from app.models.user import User
 from app.api.v1.auth import get_current_user
+from app.models.application import Application, ApplyStatus, ApplicationStatus
+from app.schemas.application import ApplicationUpdate, ApplicationBulkStatusUpdate
 
 router = APIRouter()
 
@@ -205,3 +207,39 @@ def create_interview_schedule(
         "notes": db_interview.notes,
         "created_at": db_interview.created_at
     } 
+
+
+@router.put("/{application_id}/status")
+def update_application_status(
+    application_id: int,
+    status_update: ApplicationUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    application = db.query(Application).filter(Application.id == application_id).first()
+    if not application:
+        raise HTTPException(status_code=404, detail="Application not found")
+    if status_update.status:
+        application.status = str(status_update.status)
+    if status_update.document_status:
+        application.document_status = str(status_update.document_status)
+    db.commit()
+    return {"message": "Application status updated successfully"}
+
+
+@router.put("/bulk-status")
+def bulk_update_application_status(
+    bulk_update: ApplicationBulkStatusUpdate,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    applications = db.query(Application).filter(Application.id.in_(bulk_update.application_ids)).all()
+    if not applications:
+        raise HTTPException(status_code=404, detail="No applications found")
+    for app in applications:
+        if bulk_update.status:
+            app.status = str(bulk_update.status)
+        if bulk_update.document_status:
+            app.document_status = str(bulk_update.document_status)
+    db.commit()
+    return {"message": f"{len(applications)} applications updated successfully"} 

@@ -182,7 +182,7 @@ function InterviewProgress() {
         </div>
         {/* 우측 면접 질문/메모 */}
         <div className="w-[400px] border-l border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-800 h-full min-h-0 flex flex-col">
-          <div className="h-full overflow-y-auto">
+          <div className="h-full min-h-0 flex flex-col">
             <InterviewPanel
               questions={questions}
               memo={memo}

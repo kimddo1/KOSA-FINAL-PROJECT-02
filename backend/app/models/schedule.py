@@ -1,8 +1,14 @@
-from sqlalchemy import Column, Integer, String, DateTime, Text, ForeignKey
+import enum
+from sqlalchemy import Column, Integer, String, DateTime, Text, ForeignKey, Enum as SqlEnum
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from app.core.database import Base
 
+
+class InterviewStatus(str, enum.Enum):
+    SCHEDULED = "SCHEDULED"
+    COMPLETED = "COMPLETED"
+    CANCELLED = "CANCELLED"
 
 class Schedule(Base):
     __tablename__ = "schedule"
@@ -30,7 +36,7 @@ class ScheduleInterview(Base):
     schedule_id = Column(Integer, ForeignKey('schedule.id'))
     user_id = Column(Integer, ForeignKey('company_user.id'))
     schedule_date = Column(DateTime)
-    status = Column(String(255))
+    status = Column(SqlEnum(InterviewStatus), default=InterviewStatus.SCHEDULED, nullable=False)
     
     # Relationships
     schedule = relationship("Schedule", back_populates="interviews")

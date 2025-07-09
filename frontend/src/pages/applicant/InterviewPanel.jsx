@@ -2,7 +2,7 @@ import React from 'react';
 
 function InterviewPanel({ questions = [], memo = '', onMemoChange, evaluation = {}, onEvaluationChange }) {
   return (
-    <div className="flex flex-col h-full bg-white dark:bg-gray-800 rounded-3xl shadow p-6 gap-6 min-w-[320px] max-w-[400px]">
+    <div className="flex flex-col h-full min-h-0 bg-white dark:bg-gray-800 rounded-3xl shadow p-6 gap-6 min-w-[320px] max-w-[400px]">
       <div>
         <h3 className="text-lg font-bold mb-2 text-gray-900 dark:text-gray-100">면접 질문 리스트</h3>
         <ul className="space-y-2">
@@ -53,8 +53,6 @@ function InterviewPanel({ questions = [], memo = '', onMemoChange, evaluation = 
         />
       </div>
       <div className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-        + 면접 질문 리스트 자동 채워짐<br/>
-        + 면접 메모 바로 가능<br/>
         + 전반적인 평가 메모도 가능
       </div>
     </div>

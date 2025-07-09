@@ -4,9 +4,9 @@ from typing import List
 from app.core.database import get_db
 from app.schemas.application import (
     ApplicationCreate, ApplicationUpdate, ApplicationDetail, 
-    ApplicationList, ApplicantList, ApplicationStatusHistoryCreate
+    ApplicationList
 )
-from app.models.application import Application, ApplyStatus
+from app.models.application import Application, ApplyStatus, ApplicationStatus
 from app.models.user import User
 from app.api.v1.auth import get_current_user
 from app.models.resume import Resume
@@ -198,11 +198,7 @@ def get_application(
         # 이력서 정보 추가
         "applicantName": user.name if user else "",
         "gender": user.gender if user else "",
-<<<<<<< HEAD
-        "birthDate": str(user.birth_date) if user.birth_date else None,
-=======
-        "birthDate": user.birth_date if user else "",
->>>>>>> origin/main
+        "birthDate": user.birth_date.isoformat() if user and getattr(user, "birth_date", None) else None,
         "email": user.email if user else "",
         "address": user.address if user else "",
         "phone": user.phone if user else "",
@@ -231,7 +227,10 @@ def create_application(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    db_application = Application(**application.dict(), user_id=current_user.id)
+    db_application = Application(
+        **application.dict(),
+        user_id=current_user.id
+    )
     db.add(db_application)
     db.commit()
     db.refresh(db_application)
@@ -248,19 +247,10 @@ def update_application_status(
     application = db.query(Application).filter(Application.id == application_id).first()
     if not application:
         raise HTTPException(status_code=404, detail="Application not found")
-    
     if status_update.status:
-        # 상태 변경 히스토리 기록 (ApplicationStatusHistory 모델이 없으므로 주석처리)
-        # status_history = ApplicationStatusHistory(
-        #     application_id=application_id,
-        #     status=str(status_update.status),
-        #     comment=status_update.cover_letter
-        # )
-        # db.add(status_history)
-        
-        # 애플리케이션 상태 업데이트
-        application.status = str(status_update.status)  # type: ignore
-    
+        application.status = str(status_update.status)
+    if status_update.document_status:
+        application.document_status = str(status_update.document_status)
     db.commit()
     return {"message": "Application status updated successfully"}
 
@@ -287,8 +277,8 @@ def get_applicants_by_job(
             "status": app.status,
             "applied_at": app.applied_at,
             "score": app.score,
-            "birthDate": user.birth_date.isoformat() if user.birth_date else None,
-            "gender": user.gender if user.gender else None
+            "birthDate": user.birth_date.isoformat() if user and getattr(user, "birth_date", None) else None,
+            "gender": user.gender if user and getattr(user, "gender", None) else None
         }
         applicants.append(applicant_data)
     return applicants
