@@ -134,9 +134,11 @@ function ViewPost() {
 
             <div className="space-y-6">
               <div className="bg-white dark:bg-gray-800 rounded border border-gray-300 dark:border-gray-400 p-4 text-gray-900 dark:text-white">
-                <h4 className="text-lg font-semibold ml-4 pb-2 dark:text-white">모집 인원, 기간 설정</h4>
-                <div className="border-t border-gray-300 dark:border-gray-600 p-4 pt-2">
+                <h4 className="text-lg font-semibold ml-4 pb-2 dark:text-white">모집 정보</h4>
+                <div className="border-t border-gray-300 dark:border-gray-600 px-4 pt-3 space-y-3">
                   <p><strong>모집 인원:</strong> {jobPost.headcount}명</p>
+                  <p><strong>근무지역:</strong> {jobPost.location}</p>
+                  <p><strong>고용형태:</strong> {jobPost.employment_type}</p>
                   <p><strong>기간:</strong> {jobPost.start_date} ~ {jobPost.end_date}</p>
                 </div>
               </div>
@@ -152,6 +154,35 @@ function ViewPost() {
                 </div>
               )}
 
+              {jobPost.schedules && jobPost.schedules.length > 0 && (
+                <div className="bg-white dark:bg-gray-800 rounded border border-gray-300 dark:border-gray-400 p-4 text-gray-900 dark:text-white">
+                  <h4 className="text-lg font-semibold ml-4 pb-2 dark:text-white">면접 일정</h4>
+                  <div className="border-t border-gray-300 dark:border-gray-600 px-4 pt-3 space-y-4">
+                    {jobPost.schedules.map((schedule, idx) => (
+                      <div key={idx} className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3 space-y-2">
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">면접 일정 {idx + 1}</span>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                          <div>
+                            <span className="text-xs text-gray-600 dark:text-gray-400">날짜:</span>
+                            <p className="text-sm text-gray-900 dark:text-white">{schedule.date}</p>
+                          </div>
+                          <div>
+                            <span className="text-xs text-gray-600 dark:text-gray-400">시간:</span>
+                            <p className="text-sm text-gray-900 dark:text-white">{schedule.time}</p>
+                          </div>
+                        </div>
+                        <div>
+                          <span className="text-xs text-gray-600 dark:text-gray-400">장소:</span>
+                          <p className="text-sm text-gray-900 dark:text-white">{schedule.place}</p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {jobPost.weights && (
                 <div className="bg-white dark:bg-gray-800 rounded border border-gray-300 dark:border-gray-400 p-4 text-gray-900 dark:text-white">
                   <h4 className="text-lg font-semibold ml-4 pb-2 dark:text-white">가중치 항목</h4>
@@ -162,17 +193,17 @@ function ViewPost() {
                   </div>
                 </div>
               )}
-              </div>
             </div>
-              
-            {/* 하단 버튼 */}
-            <div className="flex justify-center mt-10">
-              <button
-                onClick={() => navigate(`/applicantlist/${jobPostId}`)}
-                className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 text-white px-6 py-3 rounded text-lg"
-              >
-                지원자 조회
-              </button>
+          </div>
+
+          {/* 하단 버튼 */}
+          <div className="flex justify-center mt-10">
+            <button
+              onClick={() => navigate(`/applicantlist/${jobPostId}`)}
+              className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-800 text-white px-6 py-3 rounded text-lg"
+            >
+              지원자 조회
+            </button>
           </div>
         </div>
       </Layout>

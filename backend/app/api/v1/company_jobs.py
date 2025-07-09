@@ -59,6 +59,22 @@ def get_company_job_post(
     if job_post.company:
         job_post.companyName = job_post.company.name
     
+    # JSON 데이터를 파싱하여 응답에 추가
+    if job_post.team_members:
+        job_post.teamMembers = json.loads(job_post.team_members)
+    else:
+        job_post.teamMembers = []
+        
+    if job_post.schedules:
+        job_post.schedules = json.loads(job_post.schedules)
+    else:
+        job_post.schedules = []
+        
+    if job_post.weights:
+        job_post.weights = json.loads(job_post.weights)
+    else:
+        job_post.weights = []
+    
     return job_post
 
 
@@ -80,16 +96,25 @@ def create_company_job_post(
     print(f"Current user: {current_user.id}, company_id: {current_user.company_id}")
     print(f"Job data: {job_data}")
     
-    # JSON 데이터 처리
+    # JSON 데이터 처리 및 필드명 매핑
     if job_data.get('teamMembers'):
-        job_data['teamMembers'] = json.dumps(job_data['teamMembers']) if job_data['teamMembers'] else None
+        job_data['team_members'] = json.dumps(job_data['teamMembers']) if job_data['teamMembers'] else None
     else:
-        job_data['teamMembers'] = None
+        job_data['team_members'] = None
+    
+    if job_data.get('schedules'):
+        job_data['schedules'] = json.dumps(job_data['schedules']) if job_data['schedules'] else None
+    else:
+        job_data['schedules'] = None
         
     if job_data.get('weights'):
         job_data['weights'] = json.dumps(job_data['weights']) if job_data['weights'] else None
     else:
         job_data['weights'] = None
+    
+    # JobPost 모델에 전달할 데이터에서 camelCase 필드 제거
+    job_data.pop('teamMembers', None)
+    job_data.pop('schedules', None)
     
     db_job_post = JobPost(**job_data, company_id=current_user.company_id)
     db.add(db_job_post)

@@ -65,7 +65,7 @@ open -a Docker
 # 또는 Spotlight(⌘+Space)에서 "Docker" 검색 후 실행
 ```
 
-#### 2. 기존 컨테이너/볼륨 완전 정리
+#### 2. 기존 컨테이너/볼륨 완전 정리u
 ```bash
 # 프로젝트 루트 디렉토리에서 실행
 docker-compose down -v

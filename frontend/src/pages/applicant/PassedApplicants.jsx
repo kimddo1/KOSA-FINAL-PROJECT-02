@@ -20,6 +20,8 @@ export default function PassedApplicants() {
   const { jobPostId } = useParams();
   const [jobPost, setJobPost] = useState(null);
   const [jobPostLoading, setJobPostLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const PAGE_SIZE = 10;
 
   useEffect(() => {
     const fetchApplicants = async () => {
@@ -31,9 +33,13 @@ export default function PassedApplicants() {
         //   app.status === 'PASSED' || (app.status === 'WAITING' && app.isBookmarked === 'Y')
         // );
 
-        const filtered = data.filter(app => app.status === 'PASSED' && String(app.jobPostId) === String(jobPostId));
+        const filtered = data.filter(app => app.status === 'PASSED');
+        console.log('전체 데이터 수:', data.length);
+        console.log('PASSED 필터링 후 수:', filtered.length);
+        console.log('필터링된 지원자들:', filtered.map(app => ({ id: app.id, name: app.name, status: app.status })));
         setPassedApplicants(filtered);
         setBookmarkedList(filtered.map(app => app.isBookmarked === 'Y'));
+        setCurrentPage(1); // 페이지 이동 시 초기화
         setLoading(false);
       } catch (err) {
         console.error('Error fetching passed applicants:', err);
@@ -106,7 +112,12 @@ export default function PassedApplicants() {
     navigate('/email', { state: { applicants: selectedApplicants, interviewInfo } });
   };
 
-  if (loading || jobPostLoading) {
+  const totalPages = Math.ceil(passedApplicants.length / PAGE_SIZE);
+  const pagedApplicants = passedApplicants.slice((currentPage-1)*PAGE_SIZE, currentPage*PAGE_SIZE);
+
+  console.log('totalPages:', totalPages, 'currentPage:', currentPage, '지원자 수:', passedApplicants.length);
+
+  if (loading) {
     return (
       <Layout>
         <ViewPostSidebar jobPost={jobPost} />
@@ -149,22 +160,22 @@ export default function PassedApplicants() {
         <div className="flex-1 p-6 overflow-hidden">
           <div className={`w-full h-full ${splitMode ? 'flex gap-6' : ''}`}>
             {/* Left Panel - Applicant List */}
-            <div className={`${splitMode ? 'w-1/2' : 'w-full'}`}>
+            <div className={`${splitMode ? 'w-1/2 min-h-[600px]' : 'w-full'} h-auto`}>
               {/* Filter Tabs + Sort Button */}
               <div className="flex justify-between items-center mb-4">
-                <div className="flex gap-2">
+                {/* <div className="flex gap-2">
                   <button className="px-4 py-2 rounded bg-blue-500 text-white font-semibold">적합</button>
                   <button className="px-4 py-2 rounded bg-red-500 text-white font-semibold">부적합</button>
                   <button className="px-4 py-2 rounded bg-gray-300 text-gray-700 font-semibold">제외</button>
-                </div>
+                </div> */}
                 <button className="text-sm text-gray-700 bg-white border border-gray-300 px-3 py-1 rounded shadow-sm hover:bg-gray-100">
                   점수 정렬
                 </button>
               </div>
 
-              {/* Applicant Grid */}
-              <div className="grid grid-cols-2 gap-4">
-                {passedApplicants.map((applicant, i) => (
+              {/* 지원자 카드 그리드 (스크롤 없음) */}
+              <div className="grid grid-cols-2 gap-4 mb-8">
+                {pagedApplicants.map((applicant, i) => (
                   <div
                     key={applicant.id}
                     className={`relative bg-white dark:bg-gray-800 rounded-3xl border p-4 flex items-center gap-4 cursor-pointer hover:shadow-lg transition-all ${
@@ -220,8 +231,21 @@ export default function PassedApplicants() {
                   </div>
                 ))}
               </div>
+              {/* 페이지네이션 버튼 (항상 아래 고정) */}
+              {totalPages > 1 && (
+                <div className="flex justify-center mt-4 gap-2">
+                  {Array.from({ length: totalPages }, (_, idx) => (
+                    <button
+                      key={idx}
+                      className={`px-3 py-1 rounded ${currentPage === idx+1 ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+                      onClick={() => setCurrentPage(idx+1)}
+                    >
+                      {idx+1}
+                    </button>
+                  ))}
+                </div>
+              )}
             </div>
-
             {/* Right Panel - Pass Reason Detail */}
             {splitMode && (
               <div className="w-1/2">
@@ -232,27 +256,26 @@ export default function PassedApplicants() {
               </div>
             )}
           </div>
+          {/* Floating Action Buttons */}
+          <div className="fixed bottom-8 right-8 flex flex-row gap-4 z-50">
+            <button className="w-14 h-14 flex items-center justify-center rounded-full bg-blue-500 text-white shadow-lg hover:bg-blue-600 transition text-2xl"
+              onClick={() => navigate('/managerschedule')}
+              >
+              <FaCalendarAlt />
+            </button>
+            <button className="w-14 h-14 flex items-center justify-center rounded-full bg-green-500 text-white shadow-lg hover:bg-green-600 transition text-2xl"
+              onClick={handleEmailClick}
+              >
+              <FaEnvelope />
+            </button>
+          </div>
+          {showInterviewModal && (
+            <InterviewInfoModal
+              onSubmit={handleInterviewSubmit}
+              onClose={() => setShowInterviewModal(false)}
+            />
+          )}
         </div>
-
-        {/* Floating Action Buttons */}
-        <div className="fixed bottom-8 right-8 flex flex-row gap-4 z-50">
-          <button className="w-14 h-14 flex items-center justify-center rounded-full bg-blue-500 text-white shadow-lg hover:bg-blue-600 transition text-2xl"
-            onClick={() => navigate('/managerschedule')}
-            >
-            <FaCalendarAlt />
-          </button>
-          <button className="w-14 h-14 flex items-center justify-center rounded-full bg-green-500 text-white shadow-lg hover:bg-green-600 transition text-2xl"
-            onClick={handleEmailClick}
-            >
-            <FaEnvelope />
-          </button>
-        </div>
-        {showInterviewModal && (
-          <InterviewInfoModal
-            onSubmit={handleInterviewSubmit}
-            onClose={() => setShowInterviewModal(false)}
-          />
-        )}
       </div>
     </Layout>
   );

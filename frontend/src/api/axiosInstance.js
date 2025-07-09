@@ -24,6 +24,15 @@ instance.interceptors.response.use(
     console.error('API 에러 상세:', error.response?.data || error.message);
     console.error('요청 URL:', error.config?.url);
     console.error('요청 메서드:', error.config?.method);
+    
+    // 토큰 만료 시 자동 로그아웃
+    if (error.response?.status === 401) {
+      console.log('토큰이 만료되었습니다. 자동 로그아웃 처리');
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      window.location.href = '/login';
+    }
+    
     return Promise.reject(error);
   }
 );

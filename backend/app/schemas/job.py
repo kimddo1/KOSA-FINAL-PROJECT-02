@@ -8,6 +8,12 @@ class TeamMemberDto(BaseModel):
     role: str
 
 
+class ScheduleDto(BaseModel):
+    date: str
+    time: str
+    place: str
+
+
 class WeightDto(BaseModel):
     item: str
     score: float
@@ -46,6 +52,7 @@ class JobPostDetail(JobPost):
     companyName: Optional[str] = None
     department: Optional[str] = None
     teamMembers: Optional[List[TeamMemberDto]] = None
+    schedules: Optional[List[ScheduleDto]] = None
     weights: Optional[List[WeightDto]] = None
     created_at: datetime
     updated_at: datetime

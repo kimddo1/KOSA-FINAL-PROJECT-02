@@ -24,6 +24,7 @@ class JobPost(Base):
     employment_type = Column(String(50))
     deadline = Column(String(50))
     team_members = Column(Text)
+    schedules = Column(Text)
     weights = Column(Text)
     status = Column(String(20), default="ACTIVE")
     created_at = Column(DateTime, default=datetime.utcnow)

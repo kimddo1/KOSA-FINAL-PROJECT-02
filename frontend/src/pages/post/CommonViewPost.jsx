@@ -57,6 +57,16 @@ function CommonViewPost() {
               <p className="text-md text-gray-900 dark:text-gray-300">{jobPost.title}</p>
             </div>
 
+            <div className="bg-white dark:bg-gray-800 rounded border border-gray-300 dark:border-gray-400 p-4 text-gray-900 dark:text-white">
+              <h4 className="text-lg font-semibold ml-4 pb-2 dark:text-white">모집 정보</h4>
+              <div className="border-t border-gray-300 dark:border-gray-600 px-4 pt-3 space-y-3">
+                <p><strong>모집 인원:</strong> {jobPost.headcount}명</p>
+                <p><strong>근무지역:</strong> {jobPost.location}</p>
+                <p><strong>고용형태:</strong> {jobPost.employment_type}</p>
+                <p><strong>기간:</strong> {jobPost.start_date} ~ {jobPost.end_date}</p>
+              </div>
+            </div>
+
             <div className="flex flex-col md:flex-row gap-4">
               <div className="w-full md:w-1/2 bg-white dark:bg-gray-800 rounded border border-gray-300 dark:border-gray-400 p-4">
                 <h4 className="text-lg font-semibold text-gray-900 ml-4 pb-2 dark:text-white">지원자격</h4>

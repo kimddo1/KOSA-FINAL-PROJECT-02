@@ -198,7 +198,11 @@ def get_application(
         # 이력서 정보 추가
         "applicantName": user.name if user else "",
         "gender": user.gender if user else "",
+<<<<<<< HEAD
         "birthDate": str(user.birth_date) if user.birth_date else None,
+=======
+        "birthDate": user.birth_date if user else "",
+>>>>>>> origin/main
         "email": user.email if user else "",
         "address": user.address if user else "",
         "phone": user.phone if user else "",
@@ -261,7 +265,7 @@ def update_application_status(
     return {"message": "Application status updated successfully"}
 
 
-@router.get("/job/{job_post_id}/applicants", response_model=List[ApplicantList])
+@router.get("/job/{job_post_id}/applicants")
 def get_applicants_by_job(
     job_post_id: int,
     db: Session = Depends(get_db)
