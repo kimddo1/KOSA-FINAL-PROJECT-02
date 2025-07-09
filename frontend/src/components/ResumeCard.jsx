@@ -92,10 +92,10 @@ export default function ResumeCard({ resume }) {
         <h3 className="text-lg font-bold mb-2 text-blue-700 dark:text-blue-300">학력사항</h3>
         <table className="w-full text-sm border dark:border-gray-700 mb-2 bg-white dark:bg-gray-800 rounded-xl overflow-hidden">
           <tbody>
-            {(safeArray(educations).length > 0 ? educations : [{ period: '', schoolName: '', major: '', graduated: false, duration: '' }]).map((edu, idx) => (
+            {(safeArray(educations).length > 0 ? educations : [{ period: '', major: '', graduated: false, duration: '' }]).map((edu, idx) => (
               <tr key={idx}>
                 <td className="border dark:border-gray-700 px-2 py-1 w-32">{safe(edu.period) || safe(edu.duration)}</td>
-                <td className="border dark:border-gray-700 px-2 py-1">{safe(edu.schoolName)} {edu.graduated ? '졸업' : ''}</td>
+                <td className="border dark:border-gray-700 px-2 py-1">{edu.graduated ? '졸업' : ''}</td>
                 <td className="border dark:border-gray-700 px-2 py-1">{safe(edu.major)}</td>
                 <td className="border dark:border-gray-700 px-2 py-1">{safe(edu.degree)}</td>
                 <td className="border dark:border-gray-700 px-2 py-1">{safe(edu.gpa)}</td>

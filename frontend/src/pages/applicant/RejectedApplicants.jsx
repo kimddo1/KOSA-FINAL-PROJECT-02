@@ -128,8 +128,8 @@ export default function RejectedApplicants() {
               {/* Filter Tabs + Sort Button */}
               <div className="flex justify-between items-center mb-4">
                 <div className="flex gap-2">
-                  <button className="px-4 py-2 rounded bg-blue-500 text-white font-semibold">적합</button>
-                  <button className="px-4 py-2 rounded bg-red-500 text-white font-semibold">부적합</button>
+                  <button className="px-4 py-2 rounded bg-blue-500 text-white font-semibold">합격</button>
+                  <button className="px-4 py-2 rounded bg-red-500 text-white font-semibold">불합격</button>
                   <button className="px-4 py-2 rounded bg-gray-300 text-gray-700 font-semibold">제외</button>
                 </div>
                 <button className="text-sm text-gray-700 bg-white border border-gray-300 px-3 py-1 rounded shadow-sm hover:bg-gray-100">

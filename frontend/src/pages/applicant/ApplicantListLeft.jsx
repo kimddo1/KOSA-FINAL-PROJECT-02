@@ -130,8 +130,8 @@ function ApplicantListLeft({
           {/* 탭 필터 */}
           <div className="flex gap-1">
             <button onClick={() => setActiveTab('ALL')} className={getButtonStyle('ALL')}>전체</button>
-            <button onClick={() => setActiveTab('SUITABLE')} className={getButtonStyle('SUITABLE')}>적합</button>
-            <button onClick={() => setActiveTab('UNSUITABLE')} className={getButtonStyle('UNSUITABLE')}>부적합</button>
+            <button onClick={() => setActiveTab('SUITABLE')} className={getButtonStyle('SUITABLE')}>합격</button>
+            <button onClick={() => setActiveTab('UNSUITABLE')} className={getButtonStyle('UNSUITABLE')}>불합격</button>
             <button onClick={() => setActiveTab('EXCLUDED')} className={getButtonStyle('EXCLUDED')}>제외</button>
           </div>
           {/* Vertical Ellipsis & Dropdown */}
