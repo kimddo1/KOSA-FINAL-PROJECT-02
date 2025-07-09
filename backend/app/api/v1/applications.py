@@ -192,12 +192,12 @@ def get_application(
         "created_at": None,
         "updated_at": None,
         # 이력서 정보 추가
-        "applicantName": application.user.name if application.user else "",
-        "gender": application.user.gender if application.user else "",
-        "birthDate": str(application.user.birth_date) if application.user and application.user.birth_date else None,
-        "email": application.user.email if application.user else "",
-        "address": application.user.address if application.user else "",
-        "phone": application.user.phone if application.user else "",
+        "applicantName": user.name if user else "",
+        "gender": user.gender if user else "",
+        "birthDate": user.birth_date.isoformat() if user and getattr(user, "birth_date", None) else None,
+        "email": user.email if user else "",
+        "address": user.address if user else "",
+        "phone": user.phone if user else "",
         "educations": educations,  # Spec 테이블에서 가져오기
         "awards": awards,      # Spec 테이블에서 가져오기
         "certificates": certificates, # Spec 테이블에서 가져오기
@@ -303,10 +303,8 @@ def get_applicants_by_job(
             "status": app.status,
             "applied_at": app.applied_at,
             "score": app.score,
-            "birthDate": app.user.birth_date.isoformat() if app.user.birth_date else None,
-            "gender": app.user.gender if app.user.gender else None,
-            "education": education,
-            "degree": degree  # degree 정보 추가
+            "birthDate": user.birth_date.isoformat() if user and getattr(user, "birth_date", None) else None,
+            "gender": user.gender if user and getattr(user, "gender", None) else None
         }
         applicants.append(applicant_data)
     return applicants
