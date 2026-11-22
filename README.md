@@ -1,4 +1,44 @@
-# KOSA-FINAL-PROJECT-02
+# Kocruit — AI-Powered Recruiting Platform
+
+🏆 **1st place, KOSA AI & Software Engineering Capstone** (Seoul, Jun – Jul 2025) · Team of 4
+
+Kocruit is an end-to-end hiring platform for companies. It covers job-posting creation, applicant screening, interview-panel assignment and interview preparation, and LLM agents handle the judgment-heavy steps.
+
+## ✨ Key Features
+
+- **AI job posting & scoring weights:** a LangGraph pipeline drafts job postings and extracts structured scoring weights (RAG-assisted) that are used to filter applicants.
+- **Resume analysis:** AI summaries, color-coded highlights (value fit, skill fit, risk factors, …) and **resume plagiarism detection** through embedding similarity search.
+- **Interview question generation:** a LangGraph workflow tailored to the interview type (general, executive, second round, final), drawing on the applicant's resume and portfolio.
+- **Interview operations:** interviewer-panel assignment with AI-based interviewer matching, plus schedule reminders and notifications.
+- **Applicant analytics:** demographic and trend dashboards with GPT-generated insights.
+
+## 🏗️ Architecture
+
+```mermaid
+flowchart LR
+    FE["Frontend<br/>React · Vite · Tailwind"] --> BE["Backend<br/>Spring Boot · JPA"]
+    BE --> DB[("MySQL")]
+    BE --> AG["AI Agent service<br/>FastAPI · LangGraph"]
+    AG --> LLM["OpenAI<br/>LLM + embeddings"]
+    AG --> VS[("ChromaDB<br/>vector store")]
+    AG --> RD[("Redis<br/>cache · sessions")]
+```
+
+All services run with Docker Compose. GitHub Actions builds the images and pushes them to GHCR on every push to `main`.
+
+## 👤 My Role — Dowon Kim ([@kimddo1](https://github.com/kimddo1), top committer)
+
+- Built the **LangGraph scoring-weight extraction tool** (with RAG) that turns a job posting into structured criteria for applicant filtering.
+- Developed **resume similarity and plagiarism detection** using OpenAI embeddings and ChromaDB, including the re-check flow and UX.
+- Added the **final integrated evaluation report** and report caching.
+- Implemented the job-posting create/edit flow, interviewer-panel assignment with AI interviewer matching, and interview reminders.
+
+**Stack:** Python · LangGraph · LangChain · OpenAI · ChromaDB · FastAPI · Spring Boot · React · MySQL · Redis · Docker · GitHub Actions
+
+---
+
+# 🛠️ Developer Setup (팀원용 / Korean)
+
 
 ## 🚀 Docker 배포 방법
 
